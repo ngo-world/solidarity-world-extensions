@@ -1,4 +1,5 @@
 .smartphone-background {
+    position: relative;
     width: 200px;
     height: 400px;
     background-image: url("/smartphone.png");
@@ -9,9 +10,9 @@
 .holder {
     background: white;
     position: absolute;
-    left: 15px;
-    top: 49px;
-    bottom: 32px;
-    right: 39px;
+    left: 7px;
+    top: 41px;
+    bottom: 39px;
+    right: 12px;
     padding: 12px;
 }

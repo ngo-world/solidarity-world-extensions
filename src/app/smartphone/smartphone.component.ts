@@ -21,6 +21,7 @@ export class SmartphoneComponent implements OnInit {
     ngOnInit(): void {
         WA.onInit().then(async () => {
             console.log('Scripting API ready inside iFrame');
+
             this.player = WA.player;
             await WA.players.configureTracking();
 
