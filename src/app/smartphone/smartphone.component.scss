@@ -1,0 +1,17 @@
+.smartphone-background {
+    width: 200px;
+    height: 400px;
+    background-image: url("/smartphone.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.holder {
+    background: white;
+    position: absolute;
+    left: 15px;
+    top: 49px;
+    bottom: 32px;
+    right: 39px;
+    padding: 12px;
+}

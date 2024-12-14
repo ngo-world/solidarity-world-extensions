@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "solarity-world-smartphone": {
+    "solidarity-world-smartphone": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/solarity-world-smartphone",
+            "outputPath": "dist/solidarity-world-smartphone",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -64,10 +64,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "solarity-world-smartphone:build:production"
+              "buildTarget": "solidarity-world-smartphone:build:production"
             },
             "development": {
-              "buildTarget": "solarity-world-smartphone:build:development"
+              "buildTarget": "solidarity-world-smartphone:build:development"
             }
           },
           "defaultConfiguration": "development"

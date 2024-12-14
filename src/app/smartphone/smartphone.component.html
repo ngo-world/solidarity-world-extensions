@@ -1,12 +1,17 @@
-<div>
-  <div *ngIf="api">
-    <button (click)="stopCall()">Stop call</button>
-  </div>
-  <div *ngIf="!api">
-    <div *ngFor="let player of players">
-      <button (click)="requestCall(player)">
-        Start call to {{ player.name }}
-      </button>
+<div class="smartphone-background">
+  <div class="holder">
+    <div *ngIf="player">
+      My number: {{player.state['phoneNumber']}}
+    </div>
+    <div *ngIf="api">
+      <button (click)="stopCall()">Stop call</button>
+    </div>
+    <div *ngIf="!api">
+      <div *ngFor="let player of players">
+        <button (click)="requestCall(player)">
+          Start call to {{ player.name }} ({{player.state['phoneNumber']}})
+        </button>
+      </div>
     </div>
   </div>
 </div>

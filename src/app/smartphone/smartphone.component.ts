@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RemotePlayerInterface } from '@workadventure/iframe-api-typings';
 import { getJitsiConfig, jitsiDomain } from './jitsi-options';
+import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 
 @Component({
     selector: 'app-smartphone',
@@ -13,12 +14,14 @@ import { getJitsiConfig, jitsiDomain } from './jitsi-options';
     styleUrl: './smartphone.component.scss'
 })
 export class SmartphoneComponent implements OnInit {
+    player?: WorkadventurePlayerCommands;
     players: RemotePlayerInterface[] = Array();
     api: any;
 
     ngOnInit(): void {
         WA.onInit().then(async () => {
             console.log('Scripting API ready inside iFrame');
+            this.player = WA.player;
             await WA.players.configureTracking();
 
             setInterval(async () => {
