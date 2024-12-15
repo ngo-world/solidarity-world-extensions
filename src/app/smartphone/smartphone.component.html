@@ -1,23 +1,86 @@
-<div class="smartphone-background" [ngStyle]="{'display': hidden ? 'none' : 'block'}">
+<div
+  class="smartphone-background"
+  [ngStyle]="{ display: hidden ? 'none' : 'block' }"
+>
   <div class="holder">
-    <div *ngIf="player">
-      My number: {{player.state['phoneNumber']}}
+    <div *ngIf="player" class="text-center mb-4">
+      <b>Meine Nummer:</b>
+      <br />
+      {{ player.state["phoneNumber"] }}
     </div>
     <div *ngIf="roomNameToJoin">
-      {{callingTargetPlayer!.name}} is calling.
-      <p-button label="Accept" icon="pi pi-phone" (onClick)="acceptCall()" [raised]="true"/>
-      <p-button label="Decline" icon="pi pi-times" (onClick)="declineCall()" severity="danger" [raised]="true"/>
-    </div>
-    <div *ngIf="api">
-      Calling: {{callingTargetPlayer!.name}}
-      <button (click)="stopCall()">Stop call</button>
-    </div>
-    <div *ngIf="!api && !roomNameToJoin">
-      <div *ngFor="let player of players">
-        <button (click)="requestCall(player)">
-          Start call to {{ player.name }} ({{player.state['phoneNumber']}})
-        </button>
+      <p>{{ callingTargetPlayer!.name }} ruft Sie an.</p>
+      <div class="grid grid-cols-2 justify-items-center">
+        <p-button
+          label="Accept"
+          icon="pi pi-phone"
+          (onClick)="acceptCall()"
+          [raised]="true"
+        />
+        <p-button
+          label="Decline"
+          icon="pi pi-times"
+          (onClick)="declineCall()"
+          severity="danger"
+          [raised]="true"
+        />
       </div>
     </div>
+    <div *ngIf="api">
+      "{{ callingTargetPlayer!.name }}" ruft an.
+      <p-button
+        label="Stop call"
+        icon="pi pi-times"
+        (click)="stopCall()"
+        [raised]="true"
+      ></p-button>
+    </div>
+    <div *ngIf="!api && !roomNameToJoin">
+      <h2 class="text-xl">Kontakte</h2>
+      <div class="mb-4">
+        <div *ngIf="players.length == 0">Keine Kontakt gespeichert.</div>
+        <div
+          *ngFor="let contact of contacts"
+          class="grid grid-cols-6 items-center"
+        >
+          <div class="col-span-4 p-2">
+            {{ contact.contactName }} ({{ contact.phoneNumber }})
+          </div>
+          <p-button
+            class="justify-self-end"
+            icon="pi pi-phone"
+            (click)="requestCall(contact)"
+            [raised]="true"
+          ></p-button>
+          <p-button
+            class="justify-self-end"
+            icon="pi pi-times"
+            (click)="removeContact(contact)"
+            [raised]="true"
+            severity="danger"
+          ></p-button>
+        </div>
+      </div>
+      <h2 class="text-xl mb-1">Kontakt hinzufügen</h2>
+      <input
+      class="mb-1"
+        placeholder="Kontaktname"
+        pInputText
+        [(ngModel)]="contactToAdd"
+        autocomplete="off"
+      />
+      <input
+      class="mb-1"
+        placeholder="Telefonnummer"
+        pInputText
+        [(ngModel)]="phoneNumberToAdd"
+        autocomplete="off"
+      />
+      <p-button (onClick)="addContact(contactToAdd, phoneNumberToAdd)"> Kontakt hinzufügen</p-button>
+    </div>
   </div>
+  <button
+    class="opacity-0 fixed bottom-0 right-0 h-12 w-12"
+    (click)="reload()"
+  ></button>
 </div>

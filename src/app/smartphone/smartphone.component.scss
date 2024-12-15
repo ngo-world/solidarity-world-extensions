@@ -1,7 +1,7 @@
 .smartphone-background {
     position: relative;
-    width: 200px;
-    height: 400px;
+    width: 100%;
+    aspect-ratio: 634 / 1292;
     background-image: url("/smartphone.png");
     background-size: contain;
     background-repeat: no-repeat;
@@ -10,9 +10,13 @@
 .holder {
     background: white;
     position: absolute;
-    left: 7px;
-    top: 41px;
-    bottom: 39px;
-    right: 12px;
+    left: 4%;
+    top: 10%;
+    bottom: 9%;
+    right: 4%;
     padding: 12px;
+    -webkit-box-shadow: inset 0px 0px 5px -1px #000000; 
+    box-shadow: inset 0px 0px 5px -1px #000000;
+    border-radius: 1%;
+    overflow: auto;
 }
