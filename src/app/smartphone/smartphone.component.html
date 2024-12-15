@@ -1,12 +1,18 @@
-<div class="smartphone-background">
+<div class="smartphone-background" [ngStyle]="{'display': hidden ? 'none' : 'block'}">
   <div class="holder">
     <div *ngIf="player">
       My number: {{player.state['phoneNumber']}}
     </div>
+    <div *ngIf="roomNameToJoin">
+      {{callingTargetPlayer!.name}} is calling.
+      <button (click)="acceptCall()">Accept</button>
+      <button (click)="declineCall()">Decline</button>
+    </div>
     <div *ngIf="api">
+      Calling: {{callingTargetPlayer!.name}}
       <button (click)="stopCall()">Stop call</button>
     </div>
-    <div *ngIf="!api">
+    <div *ngIf="!api && !roomNameToJoin">
       <div *ngFor="let player of players">
         <button (click)="requestCall(player)">
           Start call to {{ player.name }} ({{player.state['phoneNumber']}})

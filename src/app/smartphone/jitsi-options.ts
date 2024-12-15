@@ -2,6 +2,7 @@ export const jitsiDomain: String = "jitsi.solidarity-world.de";
 
 export function getJitsiConfig(roomName: String) {
     return {
+        // ToDo
         width: 1,
         height: 1,
         roomName: roomName,
