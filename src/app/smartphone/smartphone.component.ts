@@ -140,7 +140,7 @@ export class SmartphoneComponent implements OnInit {
     async addContact(contactName: String, phoneNumber: String) {
         this.contacts.push({
             contactName,
-            phoneNumber
+            phoneNumber: phoneNumber.trim()
         });
         this.saveContacts();
         // ToDo
