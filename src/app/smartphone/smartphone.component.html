@@ -5,8 +5,8 @@
     </div>
     <div *ngIf="roomNameToJoin">
       {{callingTargetPlayer!.name}} is calling.
-      <button (click)="acceptCall()">Accept</button>
-      <button (click)="declineCall()">Decline</button>
+      <p-button label="Accept" icon="pi pi-phone" (onClick)="acceptCall()" [raised]="true"/>
+      <p-button label="Decline" icon="pi pi-times" (onClick)="declineCall()" severity="danger" [raised]="true"/>
     </div>
     <div *ngIf="api">
       Calling: {{callingTargetPlayer!.name}}

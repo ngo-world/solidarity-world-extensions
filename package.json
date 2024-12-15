@@ -23,8 +23,10 @@
     "@workadventure/iframe-api-typings": "^1.23.4",
     "@workadventure/scripting-api-extra": "^1.9.1",
     "lib-jitsi-meet": "^1.0.6",
+    "primeicons": "^7.0.0",
     "primeng": "^18.0.0",
     "rxjs": "~7.8.0",
+    "tailwindcss-primeui": "^0.3.4",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.10"
   },

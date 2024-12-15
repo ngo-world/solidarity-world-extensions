@@ -3,12 +3,14 @@ import { Component, OnInit } from '@angular/core';
 import { RemotePlayerInterface, Sound } from '@workadventure/iframe-api-typings';
 import { getJitsiConfig, jitsiDomain } from './jitsi-options';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
     selector: 'app-smartphone',
     standalone: true,
     imports: [
-        CommonModule
+        CommonModule,
+        ButtonModule
     ],
     templateUrl: './smartphone.component.html',
     styleUrl: './smartphone.component.scss'
