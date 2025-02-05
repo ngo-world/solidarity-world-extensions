@@ -10,6 +10,8 @@ import { TableModule } from 'primeng/table';
 import { jitsiDomain } from '../smartphone/jitsi-options';
 
 
+interface Property { name: string; value: string; type: string; }
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -21,19 +23,32 @@ export class AdminDashboardComponent implements OnInit {
   player?: WorkadventurePlayerCommands
   players: RemotePlayerInterface[] = Array();
   api: any;
+  objectsWithOpenWebsiteProperty: Property[] = [];
 
   constructor(private workadventureService: WorkadventureService, private router: Router) {
 
   }
 
   async ngOnInit(): Promise<void> {
+    const element = document.querySelector('html');
+    element?.classList.toggle('dark-mode');
+
     console.log('ngOnInit');
     await this.workadventureService.init();
+
+    
     this.player = this.workadventureService.player!;
     this.workadventureService.playersSubject.subscribe(players => {
       this.players = players;
       this.getCalls(players);
     });
+    
+    this.objectsWithOpenWebsiteProperty = await this.getAllDocumentLinksInMap();
+  }
+
+  async getAllDocumentLinksInMap() {
+    const map = await WA.room.getTiledMap();
+    return map.layers.map(l => ((l as any).objects || []) as {properties?: Property[]}).flat().filter(i => !!i.properties && i.properties.length > 0).map(i => i.properties?.find(i => i.name == 'openWebsite')).filter(i => !!i);
   }
 
   getCalls(players: RemotePlayerInterface[]) {
