@@ -1,1 +1,38 @@
-<p>admin-dashboard works!</p>
+<div class="container">
+    <p-card header="Admin Dashboard">
+        <!-- ToDo: when not defining this #header, the p-card will use the p-table #header -->
+        <div #header></div>
+        <p>
+            <p-button label="Play sound" (onClick)="playSoundForAll()" />
+        </p>
+
+        <p class="text-xl">Spieler</p>
+
+        <p-table [value]="players">
+            <ng-template #header>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Handy-Nummer</th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-player>
+                <tr>
+                    <td>{{ player.playerId }}</td>
+                    <td>{{ player.name }}</td>
+                    <td>{{ player.state['phoneNumber'] }}</td>
+                    <td>
+                        <p-button (onClick)="teleportToPlayer(player)" class="mr-3">
+                            <span pButtonLabel>Teleport</span>
+                        </p-button>
+                        <p-button icon="pi pi-phone" label="Call" (onClick)="call(player)"/>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+        <p class="text-xl">Anrufe</p>
+
+    </p-card>
+</div>

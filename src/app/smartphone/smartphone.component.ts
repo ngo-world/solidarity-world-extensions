@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RemotePlayerInterface, Sound } from '@workadventure/iframe-api-typings';
-import { getJitsiConfig, jitsiDomain } from './jitsi-options';
+import { getJitsiConfig, getRoomName, jitsiDomain } from './jitsi-options';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
-import { FloatLabel } from 'primeng/floatlabel';
+import { WorkadventureService } from '../workadventure.service';
 
 interface Contact {
     contactName: String,
@@ -37,56 +37,63 @@ export class SmartphoneComponent implements OnInit {
      * The type is JitsiMeetExternalAPI
      */
     api: any;
-    hidden: boolean = true;
+    showSmartphone: boolean = false;
     callingTargetPlayer?: RemotePlayerInterface;
     roomNameToJoin?: String;
     phoneNumberToAdd: String = "";
     contactToAdd: String = "";
     contacts: Contact[] = [];
 
+    constructor(private workadventureService: WorkadventureService) { }
+
     async ngOnInit(): Promise<void> {
-        WA.onInit().then(async () => {
-            this.contacts = WA.player.state['contacts'] as Contact[] || [];
-            this.hidden = !(WA.player.state['smartphoneShown'] as boolean);
-            console.log('Scripting API ready inside iFrame');
-            this.player = WA.player;
-            await WA.players.configureTracking();
+        await this.workadventureService.init();
+        console.info("Initializing smartphone screen");
+        this.player = this.workadventureService.player!;
+        this.showSmartphone = (WA.player.state['smartphoneShown'] as boolean);
+        this.contacts = WA.player.state['contacts'] as Contact[] || [];
 
-            setInterval(async () => {
-                this.players = Array.from(WA.players.list()).flatMap(i => [i, i, i, i, i, i, i, i]);
-            }, 1000);
+        this.workadventureService.playersSubject.subscribe(players => this.players = players);
+        this.workadventureService.eventsSubject.subscribe(event => {
+            switch (event.name) {
+                case "requestedCall":
+                    console.log("User requests call", event);
+                    this.onCallRequested(event.data as String, event.senderId!);
+                    this.showSmartphone = true;
+                    WA.player.state['smartphoneShown'] = true;
+                    break;
+                case "declinedCall":
+                    console.log("User declined call");
+                    this.stopCall();
+                    break
+                default:
+                    console.info("Received unknown event. Ignoring", event);
+                    break;
+            }
+        })
 
-            WA.event.on("requestedCall").subscribe((event) => {
-                console.log("Event received", event.name);
-                this.onCallRequested(event.data as String, event.senderId!);
-                this.hidden = false;
-                WA.player.state['smartphoneShown'] = true;
-            });
-
-            WA.event.on("declinedCall").subscribe((event) => {
-                console.log("Event received", event.name);
-                this.stopCall();
-            });
-
-            WA.player.state.onVariableChange('smartphoneShown').subscribe((_) => {
-                this.hidden = !(WA.player.state['smartphoneShown'] as boolean);
-            });
-        }).catch(e => console.error(e));
+        WA.player.state.onVariableChange('smartphoneShown').subscribe((_) => {
+            console.info("Toggling phone");
+            this.showSmartphone = (WA.player.state['smartphoneShown'] as boolean);
+        });
     }
 
     async onCallRequested(roomName: String, requestedUserId: number) {
+        console.info("Call requested", roomName, requestedUserId);
         this.ringingSound.play({ loop: true });
         const user = Array.from(WA.players.list()).find((x) => x.playerId == requestedUserId)!;
         console.log("Requesting user", user);
         this.callingTargetPlayer = user;
         this.roomNameToJoin = roomName;
-        // ToDo: show "Accept or decline call" button
-        //this.joinCall(roomName);
     }
 
     async joinCall(roomName: String, playRingingSound: boolean) {
+        console.info("Joining call", roomName, playRingingSound);
         this.roomNameToJoin = undefined;
         console.log(`Joining call in with roomname: ${roomName}`);
+
+        await this.player!.state.saveVariable(`calling`, roomName, {public: true, persist: false});
+
         this.api = new (window as any).JitsiMeetExternalAPI(jitsiDomain, getJitsiConfig(roomName));
 
         if (playRingingSound) {
@@ -109,25 +116,28 @@ export class SmartphoneComponent implements OnInit {
         }
         this.callingTargetPlayer = player;
 
-        const roomName = `${WA.player.playerId}_to_${player.playerId}`;
+        const roomName = getRoomName(WA.player.playerId, player.playerId);
         this.joinCall(roomName, true);
         player.sendEvent("requestedCall", roomName);
     }
 
-    stopCall() {
-        this.roomNameToJoin = undefined;
-        this.ringingSound.stop();
+    async stopCall() {
+        console.log("Stopping call");
+
+        await this.player!.state.saveVariable(`calling`, null, {public: true, persist: false});
+
+        this.callingTargetPlayer?.sendEvent('declinedCall', '');
         this.callingTargetPlayer = undefined;
+
+        this.roomNameToJoin = undefined;
+
+        this.ringingSound.stop();
         this.api?.dispose();
         this.api = null;
     }
 
-    declineCall() {
-        this.callingTargetPlayer!.sendEvent('declinedCall', '');
-        this.stopCall();
-    }
-
     acceptCall() {
+        console.info("Accepting call");
         this.joinCall(this.roomNameToJoin!, false);
     }
 

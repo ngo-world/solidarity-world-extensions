@@ -1,15 +1,23 @@
 <div
   class="smartphone-background"
-  [ngStyle]="{ display: hidden ? 'none' : 'block' }"
+  [ngStyle]="{ visibility: showSmartphone ? 'visible' : 'hidden', opacity: showSmartphone ? 1 : 0 }"
 >
   <div class="holder">
     <div *ngIf="player" class="text-center mb-4">
-      <b>Meine Nummer:</b>
+      <b class="text-xl">Meine Nummer:</b>
       <br />
       {{ player.state["phoneNumber"] }}
     </div>
-    <div *ngIf="roomNameToJoin">
-      <p>{{ callingTargetPlayer!.name }} ruft Sie an.</p>
+    <!-- Another user calls this user -->
+    <div
+      *ngIf="roomNameToJoin"
+      class="content-center grid justify-items-center"
+    >
+      <p class="mb-4">
+        <b>{{ callingTargetPlayer!.name }}</b>
+        <br />
+        ({{ callingTargetPlayer!.state["phoneNumber"] }})
+      </p>
       <div class="grid grid-cols-2 justify-items-center">
         <p-button
           label="Accept"
@@ -20,32 +28,39 @@
         <p-button
           label="Decline"
           icon="pi pi-times"
-          (onClick)="declineCall()"
+          (onClick)="stopCall()"
           severity="danger"
           [raised]="true"
         />
       </div>
     </div>
-    <div *ngIf="api">
-      "{{ callingTargetPlayer!.name }}" ruft an.
+    <!-- This user calls another user -->
+    <div *ngIf="api" class="content-center grid justify-items-center">
+      <p class="mb-4">
+        <b>{{ callingTargetPlayer!.name }}</b>
+        <br />
+        ({{ callingTargetPlayer!.state["phoneNumber"] }})
+      </p>
       <p-button
         label="Stop call"
         icon="pi pi-times"
         (click)="stopCall()"
         [raised]="true"
+        severity="danger"
       ></p-button>
     </div>
+    <!-- Contacts -->
     <div *ngIf="!api && !roomNameToJoin">
-      <h2 class="text-xl">Kontakte</h2>
+      <h2 class="text-xl mb-3">Kontakte</h2>
       <div class="mb-4">
-        <div *ngIf="players.length == 0">Keine Kontakt gespeichert.</div>
+        <div *ngIf="contacts.length == 0">Keine Kontakte gespeichert.</div>
         <div
           *ngFor="let contact of contacts"
           class="grid grid-cols-6 items-center"
         >
           <div class="col-span-4 p-2">
             {{ contact.contactName }}
-            <br/>
+            <br />
             {{ contact.phoneNumber }}
           </div>
           <p-button
@@ -65,20 +80,24 @@
       </div>
       <h2 class="text-xl mb-1">Kontakt hinzufügen</h2>
       <input
-      class="mb-1"
+        class="mb-1"
         placeholder="Kontaktname"
         pInputText
         [(ngModel)]="contactToAdd"
         autocomplete="off"
       />
       <input
-      class="mb-1"
+        class="mb-1"
         placeholder="Telefonnummer"
         pInputText
         [(ngModel)]="phoneNumberToAdd"
         autocomplete="off"
       />
-      <p-button (onClick)="addContact(contactToAdd, phoneNumberToAdd)"> Kontakt hinzufügen</p-button>
+      <p-button
+        [disabled]="contactToAdd.trim() == '' || phoneNumberToAdd.trim() == ''"
+        (onClick)="addContact(contactToAdd, phoneNumberToAdd)"
+        >Kontakt hinzufügen</p-button
+      >
     </div>
   </div>
   <button

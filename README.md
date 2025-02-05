@@ -4,6 +4,8 @@
 npm start
 ```
 
+:pencil: See also the `server/` directory.
+
 - https://primeng.org/icons#list
 - https://tailwindcss.com/docs/flex
 - https://workadventure.solidarity-world.de/~/maps/prototype_fund.wam

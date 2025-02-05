@@ -1,10 +1,15 @@
 export const jitsiDomain: String = "jitsi.solidarity-world.de";
+//export const jitsiDomain: String = "meet.ffrn.de";
 
-export function getJitsiConfig(roomName: String) {
+export function getRoomName(playerId1: number, playerId2: number) {
+    return `sadjlaskjdal_${playerId1}_to_${playerId2}`;
+}
+
+export function getJitsiConfig(roomName: String, width?: number, height?: number) {
     return {
         // ToDo
-        width: 1,
-        height: 1,
+        width: width || 1,
+        height: height || 1,
         roomName: roomName,
         // https://github.com/jitsi/jitsi-meet/blob/master/interface_config.js
         interfaceConfigOverwrite: {

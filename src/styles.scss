@@ -4,8 +4,12 @@
 @tailwind utilities;
 
 body,
-html {
+html,
+app-root {
   background: none transparent;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 html {
