@@ -46,14 +46,30 @@ export class SmartphoneComponent implements OnInit {
 
     constructor(private workadventureService: WorkadventureService) { }
 
+    getContacts(): Contact[] {
+        const contacts = WA.player.state['contacts'] as Contact[] || []
+        if (this.workadventureService.isCurrentUserAdmin()) {
+            const playerContacts = this.players.map(i => {
+                return {contactName: i.name, phoneNumber: (i.state['phoneNumber'] as string) || ''} as Contact;
+            })
+            playerContacts.push(...contacts);
+            return playerContacts;
+        } else {
+            return contacts;
+        }
+    }
+
     async ngOnInit(): Promise<void> {
         await this.workadventureService.init();
         console.info("Initializing smartphone screen");
         this.player = this.workadventureService.player!;
         this.showSmartphone = (WA.player.state['smartphoneShown'] as boolean);
-        this.contacts = WA.player.state['contacts'] as Contact[] || [];
+        this.contacts = this.getContacts();
 
-        this.workadventureService.playersSubject.subscribe(players => this.players = players);
+        this.workadventureService.playersSubject.subscribe(players => {
+            this.players = players
+            this.contacts = this.getContacts();
+        });
         this.workadventureService.eventsSubject.subscribe(event => {
             switch (event.name) {
                 case "requestedCall":

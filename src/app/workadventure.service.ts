@@ -3,6 +3,8 @@ import { RemotePlayerInterface, ScriptingEvent } from '@workadventure/iframe-api
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { Subject } from 'rxjs';
 
+const ADMIN_UUIDS: string[] = ['info@davidgengenbach.de'];
+
 @Injectable({
   providedIn: 'root'
 })
@@ -28,5 +30,13 @@ export class WorkadventureService {
     ].forEach(eventName => WA.event.on(eventName).subscribe((e) => this.eventsSubject.next(e)));
 
     WA.player.state.onVariableChange('smartphoneShown').subscribe((_) => { });
+  }
+
+  isUserAdmin(userUuid: string): boolean {
+    return ADMIN_UUIDS.indexOf(userUuid) >= 0;
+  }
+
+  isCurrentUserAdmin() {
+    return this.isUserAdmin(this.player?.uuid || 'Not an admin');
   }
 }

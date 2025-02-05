@@ -36,19 +36,20 @@ export class AdminDashboardComponent implements OnInit {
     console.log('ngOnInit');
     await this.workadventureService.init();
 
-    
+
     this.player = this.workadventureService.player!;
     this.workadventureService.playersSubject.subscribe(players => {
       this.players = players;
       this.getCalls(players);
     });
-    
+
     this.objectsWithOpenWebsiteProperty = await this.getAllDocumentLinksInMap();
+    console.log(this.objectsWithOpenWebsiteProperty);
   }
 
   async getAllDocumentLinksInMap() {
     const map = await WA.room.getTiledMap();
-    return map.layers.map(l => ((l as any).objects || []) as {properties?: Property[]}).flat().filter(i => !!i.properties && i.properties.length > 0).map(i => i.properties?.find(i => i.name == 'openWebsite')).filter(i => !!i);
+    return map.layers.map(l => ((l as any).objects || []) as { properties?: Property[] }).flat().filter(i => !!i.properties && i.properties.length > 0).map(i => i.properties?.find(i => i.name == 'openWebsite')).filter(i => !!i);
   }
 
   getCalls(players: RemotePlayerInterface[]) {
@@ -57,7 +58,8 @@ export class AdminDashboardComponent implements OnInit {
 
   playSoundForAll(): void {
     // /map-storage/maps/guitar.mp3
-    WA.event.broadcast("playSound", "https://aws-load-balancer.solidarity-world.de/guitar.mp3");
+    // https://aws-load-balancer.solidarity-world.de/guitar.mp3
+    WA.event.broadcast("playSound", "/map-storage/maps/guitar.mp3");
   }
 
   joinCall(targetPlayer: RemotePlayerInterface): void {
@@ -70,9 +72,15 @@ export class AdminDashboardComponent implements OnInit {
     const position = targetPlayer.position;
     WA.player.teleport(position.x, position.y);
   }
+
   call(targetPlayer: RemotePlayerInterface) {
     const roomName = 'yeah';
     targetPlayer.sendEvent('requestedCall', roomName);
     window.open(`https://${jitsiDomain}/${roomName}`);
+  }
+
+
+  isAdmin(player: RemotePlayerInterface) {
+    return this.workadventureService.isUserAdmin(player.uuid);
   }
 }

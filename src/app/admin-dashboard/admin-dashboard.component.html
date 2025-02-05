@@ -10,6 +10,7 @@
             <ng-template #header>
                 <tr>
                     <th>ID</th>
+                    <th>Admin</th>
                     <th>Name</th>
                     <th>Handy-Nummer</th>
                     <th></th>
@@ -18,12 +19,12 @@
             <ng-template #body let-player>
                 <tr>
                     <td>{{ player.playerId }}</td>
+                    <td>{{ isAdmin(player) }}</td>
                     <td>{{ player.name }}</td>
                     <td>{{ player.state['phoneNumber'] }}</td>
                     <td class="flex flex-row gap-3">
                         <p-button (onClick)="teleportToPlayer(player)" icon="pi pi-indian-rupee" label="Teleport" />
                         <p-button icon="pi pi-phone" label="Call" (onClick)="call(player)"/>
-                        <p-button icon="pi pi-check" label="Admin machen" (onClick)="call(player)"/>
                     </td>
                 </tr>
             </ng-template>

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { WorkadventureService } from '../workadventure.service';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
+import { SoundConfig } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/Sound/Sound';
 
 @Component({
   selector: 'app-background',
@@ -20,7 +21,6 @@ export class BackgroundComponent {
   async ngOnInit(): Promise<void> {
     await this.workadventureService.init();
     this.player = this.workadventureService.player!;
-    console.log(await WA.room.getTiledMap());
 
     this.workadventureService.eventsSubject.subscribe(event => {
       console.log(event);
@@ -36,16 +36,10 @@ export class BackgroundComponent {
   }
 
   playSound(soundUrl: string) {
-    const sound = WA.sound.loadSound(soundUrl);
-    const config = {
-      volume: 0.1,
-      loop: false,
-      rate: 1,
-      detune: 1,
-      delay: 0,
-      seek: 0,
-      mute: false
-    }
-    sound.play(config);
+    console.info(`Playing sound ${soundUrl}`);
+
+    WA.sound.loadSound(soundUrl).play({
+      volume: 0.5
+    });
   }
 }
