@@ -10,7 +10,11 @@ import { TableModule } from 'primeng/table';
 import { jitsiDomain } from '../smartphone/jitsi-options';
 
 
-interface Property { name: string; value: string; type: string; }
+interface MapProperty { name: string; value: string; type: string; }
+
+interface MapObject {
+  name: string, x: number, y: number, width?: number, height?: number;
+}
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -23,7 +27,8 @@ export class AdminDashboardComponent implements OnInit {
   player?: WorkadventurePlayerCommands
   players: RemotePlayerInterface[] = Array();
   api: any;
-  objectsWithOpenWebsiteProperty: Property[] = [];
+  objectsWithOpenWebsiteProperty: MapProperty[] = [];
+  objects: MapObject[] = [];
 
   constructor(private workadventureService: WorkadventureService, private router: Router) {
 
@@ -45,11 +50,15 @@ export class AdminDashboardComponent implements OnInit {
 
     this.objectsWithOpenWebsiteProperty = await this.getAllDocumentLinksInMap();
     console.log(this.objectsWithOpenWebsiteProperty);
+
+
+    const map = await WA.room.getTiledMap();
+    this.objects = map.layers.filter(i => i.type == "objectgroup").map(i => i.objects).flat().sort((a, b) => a.name.localeCompare(b.name));
   }
 
   async getAllDocumentLinksInMap() {
     const map = await WA.room.getTiledMap();
-    return map.layers.map(l => ((l as any).objects || []) as { properties?: Property[] }).flat().filter(i => !!i.properties && i.properties.length > 0).map(i => i.properties?.find(i => i.name == 'openWebsite')).filter(i => !!i);
+    return map.layers.map(l => ((l as any).objects || []) as { properties?: MapProperty[] }).flat().filter(i => !!i.properties && i.properties.length > 0).map(i => i.properties?.find(i => i.name == 'openWebsite')).filter(i => !!i);
   }
 
   getCalls(players: RemotePlayerInterface[]) {
@@ -82,5 +91,12 @@ export class AdminDashboardComponent implements OnInit {
 
   isAdmin(player: RemotePlayerInterface) {
     return this.workadventureService.isUserAdmin(player.uuid);
+  }
+
+  teleportToObject(object: MapObject) {
+    const middleX = object.x + ((object.width ?? 0) / 2);
+    const middleY = object.y + ((object.height ?? 0) / 2);
+    console.log(object, middleX, middleY);
+    WA.player.teleport(middleX, middleY);
   }
 }

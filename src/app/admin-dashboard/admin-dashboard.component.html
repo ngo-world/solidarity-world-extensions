@@ -1,34 +1,48 @@
 <div class="p-10 dark-mode grid grid-cols-1 gap-5">
-        <p class="text-xl">Aktionen</p>
-        <p>
-            <p-button label="Sound abspielen (Gitarre)" (onClick)="playSoundForAll()" />
-        </p>
+  <p class="text-xl">Aktionen</p>
+  <p>
+    <p-button label="Sound abspielen (Gitarre)" (onClick)="playSoundForAll()" />
+  </p>
 
-        <p class="text-xl">Spieler</p>
+  <p class="text-xl">Spieler</p>
 
-        <p-table [value]="players">
-            <ng-template #header>
-                <tr>
-                    <th>ID</th>
-                    <th>Admin</th>
-                    <th>Name</th>
-                    <th>Handy-Nummer</th>
-                    <th></th>
-                </tr>
-            </ng-template>
-            <ng-template #body let-player>
-                <tr>
-                    <td>{{ player.playerId }}</td>
-                    <td>{{ isAdmin(player) }}</td>
-                    <td>{{ player.name }}</td>
-                    <td>{{ player.state['phoneNumber'] }}</td>
-                    <td class="flex flex-row gap-3">
-                        <p-button (onClick)="teleportToPlayer(player)" icon="pi pi-indian-rupee" label="Teleport" />
-                        <p-button icon="pi pi-phone" label="Call" (onClick)="call(player)"/>
-                    </td>
-                </tr>
-            </ng-template>
-        </p-table>
+  <p-table [value]="players">
+    <ng-template #header>
+      <tr>
+        <th>ID</th>
+        <th>Admin</th>
+        <th>Name</th>
+        <th>Handy-Nummer</th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-player>
+      <tr>
+        <td>{{ player.playerId }}</td>
+        <td>{{ isAdmin(player) }}</td>
+        <td>{{ player.name }}</td>
+        <td>{{ player.state["phoneNumber"] }}</td>
+        <td class="flex flex-row gap-3">
+          <p-button
+            (onClick)="teleportToPlayer(player)"
+            icon="pi pi-indian-rupee"
+            label="Teleport"
+          />
+          <p-button icon="pi pi-phone" label="Call" (onClick)="call(player)" />
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
 
-        <p class="text-xl">Anrufe</p>
+  <p class="text-xl">Teleport to areas</p>
+
+  <div class="flex gap-3 flex-wrap">
+    <p-button
+      *ngFor="let object of objects"
+      (onClick)="teleportToObject(object)"
+      icon="pi pi-indian-rupee"
+      [label]="'Teleport to #' + object.name"
+      severity="info"
+    />
+  </div>
 </div>
