@@ -10,15 +10,22 @@ import { TableModule } from 'primeng/table';
 import { jitsiDomain } from '../smartphone/jitsi-options';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
-import { add } from "date-fns";
+import { add } from 'date-fns';
 
 import { InputMaskModule } from 'primeng/inputmask';
 
-
-interface MapProperty { name: string; value: string; type: string; }
+interface MapProperty {
+  name: string;
+  value: string;
+  type: string;
+}
 
 interface MapObject {
-  name: string, x: number, y: number, width?: number, height?: number;
+  name: string;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
 }
 
 @Component({
@@ -31,28 +38,28 @@ interface MapObject {
     TableModule,
     InputNumberModule,
     FormsModule,
-    InputMaskModule
+    InputMaskModule,
   ],
   templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.scss'
+  styleUrl: './admin-dashboard.component.scss',
 })
 export class AdminDashboardComponent implements OnInit {
-  player?: WorkadventurePlayerCommands
-  players: RemotePlayerInterface[] = Array();
-  api: any;
+  player?: WorkadventurePlayerCommands;
+  players: RemotePlayerInterface[] = [];
+  api: unknown;
   objectsWithOpenWebsiteProperty: MapProperty[] = [];
   objects: MapObject[] = [];
-  countdownMinutes: number = 10;
-  countdownSeconds: number = 0;
-  worldTimeHours: number = 12;
-  worldTimeMinutes: number = 0;
-  timeAsString: string = "11-00";
-  developerMode: boolean = false;
+  countdownMinutes = 10;
+  countdownSeconds = 0;
+  worldTimeHours = 12;
+  worldTimeMinutes = 0;
+  timeAsString = '11-00';
+  developerMode = false;
 
-
-  constructor(private workadventureService: WorkadventureService, private router: Router) {
-
-  }
+  constructor(
+    private workadventureService: WorkadventureService,
+    private router: Router,
+  ) {}
 
   async ngOnInit(): Promise<void> {
     const element = document.querySelector('html');
@@ -61,9 +68,8 @@ export class AdminDashboardComponent implements OnInit {
     console.log('ngOnInit');
     await this.workadventureService.init();
 
-
     this.player = this.workadventureService.player!;
-    this.workadventureService.playersSubject.subscribe(players => {
+    this.workadventureService.playersSubject.subscribe((players) => {
       this.players = players;
       this.getCalls(players);
     });
@@ -71,26 +77,40 @@ export class AdminDashboardComponent implements OnInit {
     this.objectsWithOpenWebsiteProperty = await this.getAllDocumentLinksInMap();
     console.log(this.objectsWithOpenWebsiteProperty);
 
-    this.developerMode = WA.player.state.loadVariable('developerMode') as boolean || false;
+    this.developerMode =
+      (WA.player.state.loadVariable('developerMode') as boolean) || false;
     WA.player.state.onVariableChange('developerMode').subscribe((value) => {
       this.developerMode = value as boolean;
     });
 
     const map = await WA.room.getTiledMap();
-    this.objects = map.layers.filter(i => i.type == "objectgroup").map(i => i.objects).flat().sort((a, b) => a.name.localeCompare(b.name));
+    this.objects = map.layers
+      .filter((i) => i.type == 'objectgroup')
+      .map((i) => i.objects)
+      .flat()
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   async getAllDocumentLinksInMap() {
     const map = await WA.room.getTiledMap();
-    return map.layers.map(l => ((l as any).objects || []) as { properties?: MapProperty[] }).flat().filter(i => !!i.properties && i.properties.length > 0).map(i => i.properties?.find(i => i.name == 'openWebsite')).filter(i => !!i);
+    return map.layers
+      .map(
+        (l) =>
+          (l as unknown as { objects: { properties?: MapProperty[] }[] })
+            .objects || [],
+      )
+      .flat()
+      .filter((i) => !!i.properties && i.properties.length > 0)
+      .map((i) => i.properties?.find((i) => i.name == 'openWebsite'))
+      .filter((i) => !!i);
   }
 
   getCalls(players: RemotePlayerInterface[]) {
-    players.filter(i => !!i.state['calling']).map(i => i.state['calling']);
+    players.filter((i) => !!i.state['calling']).map((i) => i.state['calling']);
   }
 
   playSoundForAll(soundUrl: string): void {
-    WA.event.broadcast("playSound", soundUrl);
+    WA.event.broadcast('playSound', soundUrl);
   }
 
   joinCall(targetPlayer: RemotePlayerInterface): void {
@@ -110,21 +130,22 @@ export class AdminDashboardComponent implements OnInit {
     window.open(`https://${jitsiDomain}/${roomName}`);
   }
 
-
   isAdmin(player: RemotePlayerInterface) {
     return this.workadventureService.isUserAdmin(player.uuid);
   }
 
   teleportToObject(object: MapObject) {
-    const middleX = object.x + ((object.width ?? 0) / 2);
-    const middleY = object.y + ((object.height ?? 0) / 2);
+    const middleX = object.x + (object.width ?? 0) / 2;
+    const middleY = object.y + (object.height ?? 0) / 2;
     console.log(object, middleX, middleY);
     WA.player.teleport(middleX, middleY);
   }
 
-
   setCountdown() {
-    const countdownDate = add(new Date(), { minutes: this.countdownMinutes, seconds: this.countdownSeconds });
+    const countdownDate = add(new Date(), {
+      minutes: this.countdownMinutes,
+      seconds: this.countdownSeconds,
+    });
     this.workadventureService.setCountdownDate(countdownDate);
   }
 
@@ -135,7 +156,8 @@ export class AdminDashboardComponent implements OnInit {
   setTime() {
     this.workadventureService.setVirtualWorldTime({
       date: new Date(),
-      offsetInSeconds: (this.worldTimeHours * 60 * 60) + (this.worldTimeMinutes * 60)
+      offsetInSeconds:
+        this.worldTimeHours * 60 * 60 + this.worldTimeMinutes * 60,
     });
   }
 
@@ -143,11 +165,10 @@ export class AdminDashboardComponent implements OnInit {
     await WA.player.state.saveVariable('developerMode', !this.developerMode);
   }
 
-
   startBroadcast() {
-    console.log("Starting broadcast");
+    console.log('Starting broadcast');
     const roomName = 'broadcast';
-    WA.event.broadcast("joinBroadcast", roomName);
+    WA.event.broadcast('joinBroadcast', roomName);
     window.open(`https://${jitsiDomain}/${roomName}`);
   }
 }

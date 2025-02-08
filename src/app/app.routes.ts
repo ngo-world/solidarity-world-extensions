@@ -6,10 +6,10 @@ import { BackgroundComponent } from './background/background.component';
 import { BroadcastComponent } from './broadcast/broadcast.component';
 
 export const routes: Routes = [
-    { path: 'smartphone', component: SmartphoneComponent },
-    { path: 'admin-dashboard', component: AdminDashboardComponent },
-    { path: 'background', component: BackgroundComponent },
-    { path: 'debug', component: DebugComponent },
-    { path: 'broadcast', component: BroadcastComponent },
-    { path: '',   redirectTo: '/smartphone', pathMatch: 'full' }
+  { path: 'smartphone', component: SmartphoneComponent },
+  { path: 'admin-dashboard', component: AdminDashboardComponent },
+  { path: 'background', component: BackgroundComponent },
+  { path: 'debug', component: DebugComponent },
+  { path: 'broadcast', component: BroadcastComponent },
+  { path: '', redirectTo: '/smartphone', pathMatch: 'full' },
 ];

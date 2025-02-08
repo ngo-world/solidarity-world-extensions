@@ -1,6 +1,9 @@
 <div
   class="smartphone-background"
-  [ngStyle]="{ visibility: showSmartphone ? 'visible' : 'hidden', opacity: showSmartphone ? 1 : 0 }"
+  [ngStyle]="{
+    visibility: showSmartphone ? 'visible' : 'hidden',
+    opacity: showSmartphone ? 1 : 0,
+  }"
 >
   <div class="holder">
     <div *ngIf="player" class="text-center mb-4">
@@ -53,7 +56,7 @@
     <div *ngIf="!api && !roomNameToJoin">
       <h2 class="text-xl mb-3">Kontakte</h2>
       <div class="mb-4">
-        <div *ngIf="contacts.length == 0">Keine Kontakte gespeichert.</div>
+        <div *ngIf="contacts.length === 0">Keine Kontakte gespeichert.</div>
         <div
           *ngFor="let contact of contacts"
           class="grid grid-cols-6 items-center"
@@ -94,14 +97,12 @@
         autocomplete="off"
       />
       <p-button
-        [disabled]="contactToAdd.trim() == '' || phoneNumberToAdd.trim() == ''"
+        [disabled]="
+          contactToAdd.trim() === '' || phoneNumberToAdd.trim() === ''
+        "
         (onClick)="addContact(contactToAdd, phoneNumberToAdd)"
         >Kontakt hinzufügen</p-button
       >
     </div>
   </div>
-  <button
-    class="opacity-0 fixed bottom-0 right-0 h-12 w-12"
-    (click)="reload()"
-  ></button>
 </div>

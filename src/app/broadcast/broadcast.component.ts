@@ -7,17 +7,22 @@ import { getJitsiConfig, jitsiDomain } from '../smartphone/jitsi-options';
   standalone: true,
   imports: [],
   templateUrl: './broadcast.component.html',
-  styleUrl: './broadcast.component.scss'
+  styleUrl: './broadcast.component.scss',
 })
 export class BroadcastComponent implements OnInit {
-  api: any;
+  api: unknown;
 
-  constructor(private workadventureService: WorkadventureService) { }
+  constructor(private workadventureService: WorkadventureService) {}
 
   async ngOnInit(): Promise<void> {
     await this.workadventureService.init();
-    console.info("Initializing broadcast screen");
+    console.info('Initializing broadcast screen');
     const roomName = 'broadcast';
-    this.api = new (window as any).JitsiMeetExternalAPI(jitsiDomain, getJitsiConfig(roomName, true));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.api = new (window as any).JitsiMeetExternalAPI(
+      jitsiDomain,
+      getJitsiConfig(roomName, true),
+    );
   }
 }

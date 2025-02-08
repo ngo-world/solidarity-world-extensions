@@ -42,8 +42,16 @@
 
   <p class="text-xl"><i class="pi pi-volume-up"></i> Sounds</p>
   <p class="flex gap-3">
-    <p-button icon="pi pi-play" label="Guitar" (onClick)="playSoundForAll('/map-storage/maps/guitar.mp3')" />
-    <p-button icon="pi pi-play" label="Crowd talking" (onClick)="playSoundForAll('/map-storage/maps/crowd-talking-1.mp3')" />
+    <p-button
+      icon="pi pi-play"
+      label="Guitar"
+      (onClick)="playSoundForAll('/map-storage/maps/guitar.mp3')"
+    />
+    <p-button
+      icon="pi pi-play"
+      label="Crowd talking"
+      (onClick)="playSoundForAll('/map-storage/maps/crowd-talking-1.mp3')"
+    />
   </p>
 
   <p class="text-xl"><i class="pi pi-clock"></i> Time</p>
@@ -69,19 +77,14 @@
     />
   </div>
 
-  <p class="text-xl">
-    <i class="pi pi-microphone"></i> Broadcasting
-  </p>
-  <p-button
-    label="Start broadcast"
-    (onClick)="startBroadcast()"
-  />
+  <p class="text-xl"><i class="pi pi-microphone"></i> Broadcasting</p>
+  <p-button label="Start broadcast" (onClick)="startBroadcast()" />
 
   <p class="text-xl">
     <i class="pi pi-exclamation-triangle"></i> Developer options
   </p>
   <p-button
-    [label]="developerMode ? 'Disable developer mode' : 'Enable developer mode' "
+    [label]="developerMode ? 'Disable developer mode' : 'Enable developer mode'"
     (onClick)="toggleDeveloperMode()"
     [severity]="developerMode ? 'primary' : 'danger'"
   />

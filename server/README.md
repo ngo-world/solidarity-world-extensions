@@ -5,7 +5,6 @@
 - https://eu-central-1.console.aws.amazon.com/acm/home?region=eu-central-1#/certificates/51849783-60b7-4df9-8606-38d89d7d6cc2
 - https://web.solidarity-world.de/smartphone
 
-
 ```shell
 ng build
 docker build --file server/Dockerfile -t solidarity-world-extensions-server .
