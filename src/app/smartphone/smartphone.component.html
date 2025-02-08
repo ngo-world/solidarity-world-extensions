@@ -7,19 +7,19 @@
 >
   <div class="holder">
     <div *ngIf="player" class="text-center mb-4">
-      <b class="text-xl">Meine Nummer:</b>
+      <b class="text-xl">My phone number:</b>
       <br />
       {{ player.state["phoneNumber"] }}
     </div>
     <!-- Another user calls this user -->
     <div
-      *ngIf="roomNameToJoin"
+      *ngIf="callRequest"
       class="content-center grid justify-items-center"
     >
       <p class="mb-4">
-        <b>{{ callingTargetPlayer!.name }}</b>
+        <b>{{ callRequest.fromPlayerName }}</b>
         <br />
-        ({{ callingTargetPlayer!.state["phoneNumber"] }})
+        ({{ callRequest.fromPhoneNumber }})
       </p>
       <div class="grid grid-cols-2 justify-items-center">
         <p-button
@@ -53,10 +53,10 @@
       ></p-button>
     </div>
     <!-- Contacts -->
-    <div *ngIf="!api && !roomNameToJoin">
-      <h2 class="text-xl mb-3">Kontakte</h2>
+    <div *ngIf="!api && !callRequest" class="flex flex-col gap-2">
+      <h2 class="text-xl mb-3">Contacts</h2>
       <div class="mb-4">
-        <div *ngIf="contacts.length === 0">Keine Kontakte gespeichert.</div>
+        <div *ngIf="contacts.length === 0">No contacts added yet.</div>
         <div
           *ngFor="let contact of contacts"
           class="grid grid-cols-6 items-center"
@@ -81,17 +81,17 @@
           ></p-button>
         </div>
       </div>
-      <h2 class="text-xl mb-1">Kontakt hinzufügen</h2>
+      <h2 class="text-xl mb-1">Add contact</h2>
       <input
         class="mb-1"
-        placeholder="Kontaktname"
+        placeholder="Name"
         pInputText
         [(ngModel)]="contactToAdd"
         autocomplete="off"
       />
       <input
         class="mb-1"
-        placeholder="Telefonnummer"
+        placeholder="Phone number"
         pInputText
         [(ngModel)]="phoneNumberToAdd"
         autocomplete="off"
@@ -101,8 +101,8 @@
           contactToAdd.trim() === '' || phoneNumberToAdd.trim() === ''
         "
         (onClick)="addContact(contactToAdd, phoneNumberToAdd)"
-        >Kontakt hinzufügen</p-button
-      >
+        label="Add contact"
+      />
     </div>
   </div>
 </div>

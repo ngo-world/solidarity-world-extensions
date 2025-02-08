@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { add } from 'date-fns';
 
 import { InputMaskModule } from 'primeng/inputmask';
+import { CallRequest } from '../smartphone/smartphone.component';
 
 interface MapProperty {
   name: string;
@@ -55,6 +56,7 @@ export class AdminDashboardComponent implements OnInit {
   worldTimeMinutes = 0;
   timeAsString = '11-00';
   developerMode = false;
+  calls: CallRequest[] = [];
 
   constructor(
     private workadventureService: WorkadventureService,
@@ -71,7 +73,7 @@ export class AdminDashboardComponent implements OnInit {
     this.player = this.workadventureService.player!;
     this.workadventureService.playersSubject.subscribe((players) => {
       this.players = players;
-      this.getCalls(players);
+      this.calls = this.getCalls(players);
     });
 
     this.objectsWithOpenWebsiteProperty = await this.getAllDocumentLinksInMap();
@@ -105,8 +107,8 @@ export class AdminDashboardComponent implements OnInit {
       .filter((i) => !!i);
   }
 
-  getCalls(players: RemotePlayerInterface[]) {
-    players.filter((i) => !!i.state['calling']).map((i) => i.state['calling']);
+  getCalls(players: RemotePlayerInterface[]): CallRequest[] {
+    return players.filter((i) => !!i.state['calling']).map((i) => i.state['calling'] as CallRequest);
   }
 
   playSoundForAll(soundUrl: string): void {
@@ -125,9 +127,15 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   call(targetPlayer: RemotePlayerInterface) {
-    const roomName = 'yeah';
-    targetPlayer.sendEvent('requestedCall', roomName);
-    window.open(`https://${jitsiDomain}/${roomName}`);
+    const callRequest: CallRequest = {
+      fromPhoneNumber: "+111111111",
+      fromPlayerName: "Admin",
+      toPhoneNumber: targetPlayer.state['phoneNumber'] as string,
+      toPlayerName: targetPlayer.name,
+      roomName: 'admin_to_player_'
+    };
+    WorkadventureService.requestCall(targetPlayer, callRequest);
+    window.open(`https://${jitsiDomain}/${callRequest.roomName}`);
   }
 
   isAdmin(player: RemotePlayerInterface) {
@@ -170,5 +178,8 @@ export class AdminDashboardComponent implements OnInit {
     const roomName = 'broadcast';
     WA.event.broadcast('joinBroadcast', roomName);
     window.open(`https://${jitsiDomain}/${roomName}`);
+  }
+  listenToCall(callRequest: CallRequest) {
+    window.open(`https://${jitsiDomain}/${callRequest.roomName}`);
   }
 }

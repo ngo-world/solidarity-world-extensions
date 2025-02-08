@@ -16,6 +16,14 @@ interface Contact {
   phoneNumber: string;
 }
 
+export interface CallRequest {
+  fromPhoneNumber: string;
+  fromPlayerName: string;
+  toPhoneNumber: string;
+  toPlayerName: string;
+  roomName: string;
+}
+
 @Component({
   selector: 'app-smartphone',
   standalone: true,
@@ -40,7 +48,7 @@ export class SmartphoneComponent implements OnInit {
   api: any;
   showSmartphone = false;
   callingTargetPlayer?: RemotePlayerInterface;
-  roomNameToJoin?: string;
+  callRequest?: CallRequest;
   phoneNumberToAdd = '';
   contactToAdd = '';
   contacts: Contact[] = [];
@@ -49,7 +57,8 @@ export class SmartphoneComponent implements OnInit {
 
   getContacts(): Contact[] {
     const contacts = (WA.player.state['contacts'] as Contact[]) || [];
-    if (this.workadventureService.isCurrentUserAdmin()) {
+    // eslint-disable-next-line no-constant-condition, no-constant-binary-expression
+    if (false && this.workadventureService.isCurrentUserAdmin()) {
       const playerContacts = this.players.map((i) => {
         return {
           contactName: i.name,
@@ -78,7 +87,7 @@ export class SmartphoneComponent implements OnInit {
       switch (event.name) {
         case 'requestedCall':
           console.log('User requests call', event);
-          this.onCallRequested(event.data as string, event.senderId!);
+          this.onCallRequested(event.data as CallRequest, event.senderId!);
           this.showSmartphone = true;
           WA.player.state['smartphoneShown'] = true;
           break;
@@ -98,30 +107,29 @@ export class SmartphoneComponent implements OnInit {
     });
   }
 
-  async onCallRequested(roomName: string, requestedUserId: number) {
-    console.info('Call requested', roomName, requestedUserId);
+  async onCallRequested(callRequest: CallRequest, requestedUserId: number) {
+    console.info('Call requested', callRequest.roomName, requestedUserId);
     this.ringingSound.play({ loop: true });
     const user = Array.from(WA.players.list()).find(
       (x) => x.playerId == requestedUserId,
     )!;
     console.log('Requesting user', user);
     this.callingTargetPlayer = user;
-    this.roomNameToJoin = roomName;
+    this.callRequest = callRequest;
   }
 
-  async joinCall(roomName: string, playRingingSound: boolean) {
-    console.info('Joining call', roomName, playRingingSound);
-    this.roomNameToJoin = undefined;
-    console.log(`Joining call in with roomname: ${roomName}`);
+  async joinCall(callRequest: CallRequest, playRingingSound: boolean) {
+    console.info('Joining call', callRequest, playRingingSound);
+    this.callRequest = undefined;
 
-    await this.player!.state.saveVariable(`calling`, roomName, {
+    await this.player!.state.saveVariable("calling", callRequest, {
       public: true,
       persist: false,
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.api = new (window as any).JitsiMeetExternalAPI(
       jitsiDomain,
-      getJitsiConfig(roomName, false, 1, 1),
+      getJitsiConfig(callRequest.roomName, false, 1, 1),
     );
 
     if (playRingingSound) {
@@ -150,15 +158,21 @@ export class SmartphoneComponent implements OnInit {
     }
     this.callingTargetPlayer = player;
 
-    const roomName = getRoomName(WA.player.playerId, player.playerId);
-    this.joinCall(roomName, true);
-    player.sendEvent('requestedCall', roomName);
+    const callRequest: CallRequest = {
+      fromPlayerName: WA.player.name,
+      fromPhoneNumber: WA.player.state['phoneNumber'] as string,
+      toPlayerName: player.name,
+      toPhoneNumber: player.state['phoneNumber'] as string,
+      roomName: getRoomName(WA.player.playerId, player.playerId),
+    }
+    this.joinCall(callRequest, true);
+    WorkadventureService.requestCall(player, callRequest);
   }
 
   async stopCall() {
     console.log('Stopping call');
 
-    await this.player!.state.saveVariable(`calling`, null, {
+    await this.player!.state.saveVariable("calling", null, {
       public: true,
       persist: false,
     });
@@ -166,7 +180,7 @@ export class SmartphoneComponent implements OnInit {
     this.callingTargetPlayer?.sendEvent('declinedCall', '');
     this.callingTargetPlayer = undefined;
 
-    this.roomNameToJoin = undefined;
+    this.callRequest = undefined;
 
     this.ringingSound.stop();
     this.api?.dispose();
@@ -175,7 +189,7 @@ export class SmartphoneComponent implements OnInit {
 
   acceptCall() {
     console.info('Accepting call');
-    this.joinCall(this.roomNameToJoin!, false);
+    this.joinCall(this.callRequest!, false);
   }
 
   // ToDo: this is only needed when hot reloading

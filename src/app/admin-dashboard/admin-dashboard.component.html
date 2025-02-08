@@ -29,18 +29,43 @@
     </ng-template>
   </p-table>
 
+  <p class="text-xl"><i class="pi pi-phone"></i> Calls</p>
+
+  <p-table [value]="calls">
+    <ng-template #header>
+      <tr>
+        <th>From name</th>
+        <th>From phone number</th>
+        <th>To name</th>
+        <th>To phone number</th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-call>
+      <tr>
+        <td>{{ call.fromPlayerName }}</td>
+        <td>{{ call.fromPhoneNumber }}</td>
+        <td>{{ call.toPlayerName }}</td>
+        <td>{{ call.toPhoneNumber }}</td>
+        <td class="flex flex-row gap-3">
+          <p-button icon="pi pi-phone" label="Join call" (onClick)="listenToCall(call)" />
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
   <p class="text-xl"><i class="pi pi-indian-rupee"></i> Teleport to areas</p>
 
   <div class="flex gap-3 flex-wrap">
     <p-button
       *ngFor="let object of objects"
       (onClick)="teleportToObject(object)"
-      [label]="'Teleport to #' + object.name"
+      [label]="'#' + object.name"
       severity="info"
     />
   </div>
 
-  <p class="text-xl"><i class="pi pi-volume-up"></i> Sounds</p>
+  <p class="text-xl"><i class="pi pi-volume-up"></i> Play sounds for everyone</p>
   <p class="flex gap-3">
     <p-button
       icon="pi pi-play"

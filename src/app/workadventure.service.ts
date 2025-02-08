@@ -6,6 +6,7 @@ import {
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { formatISO, parseISO } from 'date-fns';
 import { Subject } from 'rxjs';
+import { CallRequest } from './smartphone/smartphone.component';
 
 const ADMIN_UUIDS: string[] = ['info@davidgengenbach.de'];
 
@@ -73,6 +74,7 @@ export class WorkadventureService {
     const val = WA.state.loadVariable(
       WorkadventureService.ROOM_STATE_VARIABLE_WORLD_TIME,
     ) as { date: string; offsetInSeconds: number } | undefined;
+    console.log("YEAH", val);
     if (!val) {
       return {
         date: new Date(),
@@ -92,5 +94,9 @@ export class WorkadventureService {
     return developerMode
       ? 'https://localhost:4200'
       : 'https://web.solidarity-world.de';
+  }
+
+  static requestCall(targetPlayer: RemotePlayerInterface, callRequest: CallRequest) {
+    targetPlayer.sendEvent('requestedCall', callRequest);
   }
 }
