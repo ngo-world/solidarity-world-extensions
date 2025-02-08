@@ -86,7 +86,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   getCalls(players: RemotePlayerInterface[]) {
-    players.filter(i => !!i.state['calling']).map(i => i.state['calling'])
+    players.filter(i => !!i.state['calling']).map(i => i.state['calling']);
   }
 
   playSoundForAll(soundUrl: string): void {
