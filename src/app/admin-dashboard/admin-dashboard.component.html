@@ -1,10 +1,5 @@
 <div class="p-10 dark-mode grid grid-cols-1 gap-5">
-  <p class="text-xl">Aktionen</p>
-  <p>
-    <p-button label="Sound abspielen (Gitarre)" (onClick)="playSoundForAll()" />
-  </p>
-
-  <p class="text-xl">Spieler</p>
+  <p class="text-xl"><i class="pi pi-user"></i> Users</p>
 
   <p-table [value]="players">
     <ng-template #header>
@@ -34,15 +29,60 @@
     </ng-template>
   </p-table>
 
-  <p class="text-xl">Teleport to areas</p>
+  <p class="text-xl"><i class="pi pi-indian-rupee"></i> Teleport to areas</p>
 
   <div class="flex gap-3 flex-wrap">
     <p-button
       *ngFor="let object of objects"
       (onClick)="teleportToObject(object)"
-      icon="pi pi-indian-rupee"
       [label]="'Teleport to #' + object.name"
       severity="info"
     />
   </div>
+
+  <p class="text-xl"><i class="pi pi-volume-up"></i> Sounds</p>
+  <p class="flex gap-3">
+    <p-button icon="pi pi-play" label="Guitar" (onClick)="playSoundForAll('/map-storage/maps/guitar.mp3')" />
+    <p-button icon="pi pi-play" label="Crowd talking" (onClick)="playSoundForAll('/map-storage/maps/crowd-talking-1.mp3')" />
+  </p>
+
+  <p class="text-xl"><i class="pi pi-clock"></i> Time</p>
+  <div class="flex gap-3">
+    <p-inputnumber [(ngModel)]="worldTimeHours" suffix=" hours" />
+    <p-inputnumber [(ngModel)]="worldTimeMinutes" suffix=" minutes" />
+    <p-button icon="pi pi-clock" label="Set world time" (onClick)="setTime()" />
+  </div>
+  <div class="flex gap-3">
+    <p-inputnumber [(ngModel)]="countdownMinutes" suffix=" minutes" />
+    <p-inputnumber [(ngModel)]="countdownSeconds" suffix=" seconds" />
+    <p-button
+      icon="pi pi-stopwatch"
+      label="Set countdown"
+      (onClick)="setCountdown()"
+      severity="primary"
+    />
+    <p-button
+      icon="pi pi-trash"
+      label="Remove countdown"
+      (onClick)="resetCountdown()"
+      severity="danger"
+    />
+  </div>
+
+  <p class="text-xl">
+    <i class="pi pi-microphone"></i> Broadcasting
+  </p>
+  <p-button
+    label="Start broadcast"
+    (onClick)="startBroadcast()"
+  />
+
+  <p class="text-xl">
+    <i class="pi pi-exclamation-triangle"></i> Developer options
+  </p>
+  <p-button
+    [label]="developerMode ? 'Disable developer mode' : 'Enable developer mode' "
+    (onClick)="toggleDeveloperMode()"
+    [severity]="developerMode ? 'primary' : 'danger'"
+  />
 </div>

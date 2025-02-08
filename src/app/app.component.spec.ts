@@ -14,16 +14,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'solidarity-world-smartphone' title`, () => {
+  it(`should have the 'solidarity-world-web' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('solidarity-world-smartphone');
+    expect(app.title).toEqual('solidarity-world-web');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, solidarity-world-smartphone');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, solidarity-world-web');
   });
 });

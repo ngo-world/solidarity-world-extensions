@@ -1,4 +1,4 @@
-# solidarity-world-smartphone
+# solidarity-world-web
 
 ```shell
 npm start

@@ -26,7 +26,7 @@ interface Contact {
     styleUrl: './smartphone.component.scss'
 })
 export class SmartphoneComponent implements OnInit {
-    ringingSound: Sound = WA.sound.loadSound("https://jitsi.solidarity-world.de/sounds/outgoingRinging.mp3");
+    ringingSound: Sound = WA.sound.loadSound(`https://${jitsiDomain}/sounds/outgoingRinging.mp3`);
     player?: WorkadventurePlayerCommands;
     players: RemotePlayerInterface[] = Array();
     /**
@@ -110,7 +110,7 @@ export class SmartphoneComponent implements OnInit {
 
         await this.player!.state.saveVariable(`calling`, roomName, {public: true, persist: false});
 
-        this.api = new (window as any).JitsiMeetExternalAPI(jitsiDomain, getJitsiConfig(roomName));
+        this.api = new (window as any).JitsiMeetExternalAPI(jitsiDomain, getJitsiConfig(roomName, false, 1, 1));
 
         if (playRingingSound) {
             this.ringingSound.play({ loop: true });
@@ -119,7 +119,7 @@ export class SmartphoneComponent implements OnInit {
             this.ringingSound.stop();
         });
         this.api.addListener('participantLeft', () => {
-            // WA.sound.loadSound("https://jitsi.solidarity-world.de/sounds/left.mp3").play(undefined);
+            // WA.sound.loadSound(`https://${jitsiDomain}/sounds/left.mp3`).play(undefined);
             this.stopCall();
         });
     }

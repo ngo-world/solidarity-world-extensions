@@ -1,15 +1,32 @@
-export const jitsiDomain: String = "jitsi.solidarity-world.de";
+export const jitsiDomain: String = "jitsi-meet.solidarity-world.de";
 //export const jitsiDomain: String = "meet.ffrn.de";
 
 export function getRoomName(playerId1: number, playerId2: number) {
     return `sadjlaskjdal_${playerId1}_to_${playerId2}`;
 }
 
-export function getJitsiConfig(roomName: String, width?: number, height?: number) {
+export function getJitsiConfig(roomName: String, joiningBroadcast: boolean, width?: number, height?: number) {
+    /*
+    No broadcast:
+        testing: {
+            noAutoPlayVideo: true
+        },
+        startAudioOnly: true,
+        startWithAudioMuted: false,
+        startVideoMuted: false,
+        startWithVideoMuted: true,
+    Broadcast:
+        testing: {
+            noAutoPlayVideo: true
+        },
+        startAudioOnly: false,
+        startWithAudioMuted: true,
+        startVideoMuted: true,
+        startWithVideoMuted: true,
+    */
     return {
-        // ToDo
-        width: width || 1,
-        height: height || 1,
+        width: width,
+        height: height,
         roomName: roomName,
         // https://github.com/jitsi/jitsi-meet/blob/master/interface_config.js
         interfaceConfigOverwrite: {
@@ -23,6 +40,13 @@ export function getJitsiConfig(roomName: String, width?: number, height?: number
         },
         // https://github.com/jitsi/jitsi-meet/blob/master/config.js
         configOverwrite: {
+            testing: {
+                noAutoPlayVideo: true
+            },
+            startAudioOnly: !joiningBroadcast,
+            startWithAudioMuted: joiningBroadcast,
+            startVideoMuted: joiningBroadcast,
+            startWithVideoMuted: true,
             disableModeratorIndicator: true,
             disableReactions: true,
             disableReactionsModeration: true,
@@ -33,17 +57,10 @@ export function getJitsiConfig(roomName: String, width?: number, height?: number
             screenshotCapture: {
                 enabled: false,
             },
-            testing: {
-                noAutoPlayVideo: true
-            },
-            startAudioOnly: true,
             localRecording: {
                 enabled: true,
                 notifyAllParticipants: false,
             },
-            startWithAudioMuted: false,
-            startVideoMuted: 0,
-            startWithVideoMuted: true,
             transcription: {
                 enabled: false
             },

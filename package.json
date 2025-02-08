@@ -1,5 +1,5 @@
 {
-  "name": "solidarity-world-smartphone",
+  "name": "solidarity-world-web",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -18,10 +18,12 @@
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
+    "@date-fns/utc": "^2.1.0",
     "@primeng/themes": "^18.0.0",
     "@solyd/lib-jitsi-meet": "^2.7001.1",
     "@workadventure/iframe-api-typings": "^1.23.4",
     "@workadventure/scripting-api-extra": "^1.9.1",
+    "date-fns": "^4.1.0",
     "lib-jitsi-meet": "^1.0.6",
     "primeicons": "^7.0.0",
     "primeng": "^18.0.0",

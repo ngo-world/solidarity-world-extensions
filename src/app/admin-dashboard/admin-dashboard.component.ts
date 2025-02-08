@@ -8,6 +8,11 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { jitsiDomain } from '../smartphone/jitsi-options';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { FormsModule } from '@angular/forms';
+import { add } from "date-fns";
+
+import { InputMaskModule } from 'primeng/inputmask';
 
 
 interface MapProperty { name: string; value: string; type: string; }
@@ -19,7 +24,15 @@ interface MapObject {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CardModule, ButtonModule, CommonModule, TableModule],
+  imports: [
+    CardModule,
+    ButtonModule,
+    CommonModule,
+    TableModule,
+    InputNumberModule,
+    FormsModule,
+    InputMaskModule
+  ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
@@ -29,6 +42,13 @@ export class AdminDashboardComponent implements OnInit {
   api: any;
   objectsWithOpenWebsiteProperty: MapProperty[] = [];
   objects: MapObject[] = [];
+  countdownMinutes: number = 10;
+  countdownSeconds: number = 0;
+  worldTimeHours: number = 12;
+  worldTimeMinutes: number = 0;
+  timeAsString: string = "11-00";
+  developerMode: boolean = false;
+
 
   constructor(private workadventureService: WorkadventureService, private router: Router) {
 
@@ -51,6 +71,10 @@ export class AdminDashboardComponent implements OnInit {
     this.objectsWithOpenWebsiteProperty = await this.getAllDocumentLinksInMap();
     console.log(this.objectsWithOpenWebsiteProperty);
 
+    this.developerMode = WA.player.state.loadVariable('developerMode') as boolean || false;
+    WA.player.state.onVariableChange('developerMode').subscribe((value) => {
+      this.developerMode = value as boolean;
+    });
 
     const map = await WA.room.getTiledMap();
     this.objects = map.layers.filter(i => i.type == "objectgroup").map(i => i.objects).flat().sort((a, b) => a.name.localeCompare(b.name));
@@ -65,10 +89,8 @@ export class AdminDashboardComponent implements OnInit {
     players.filter(i => !!i.state['calling']).map(i => i.state['calling'])
   }
 
-  playSoundForAll(): void {
-    // /map-storage/maps/guitar.mp3
-    // https://aws-load-balancer.solidarity-world.de/guitar.mp3
-    WA.event.broadcast("playSound", "/map-storage/maps/guitar.mp3");
+  playSoundForAll(soundUrl: string): void {
+    WA.event.broadcast("playSound", soundUrl);
   }
 
   joinCall(targetPlayer: RemotePlayerInterface): void {
@@ -98,5 +120,34 @@ export class AdminDashboardComponent implements OnInit {
     const middleY = object.y + ((object.height ?? 0) / 2);
     console.log(object, middleX, middleY);
     WA.player.teleport(middleX, middleY);
+  }
+
+
+  setCountdown() {
+    const countdownDate = add(new Date(), { minutes: this.countdownMinutes, seconds: this.countdownSeconds });
+    this.workadventureService.setCountdownDate(countdownDate);
+  }
+
+  resetCountdown() {
+    this.workadventureService.setCountdownDate(undefined);
+  }
+
+  setTime() {
+    this.workadventureService.setVirtualWorldTime({
+      date: new Date(),
+      offsetInSeconds: (this.worldTimeHours * 60 * 60) + (this.worldTimeMinutes * 60)
+    });
+  }
+
+  async toggleDeveloperMode() {
+    await WA.player.state.saveVariable('developerMode', !this.developerMode);
+  }
+
+
+  startBroadcast() {
+    console.log("Starting broadcast");
+    const roomName = 'broadcast';
+    WA.event.broadcast("joinBroadcast", roomName);
+    window.open(`https://${jitsiDomain}/${roomName}`);
   }
 }
