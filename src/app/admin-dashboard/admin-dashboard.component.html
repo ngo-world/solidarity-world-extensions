@@ -5,9 +5,9 @@
     <ng-template #header>
       <tr>
         <th>ID</th>
-        <th>Admin</th>
+        <th>Is admin?</th>
         <th>Name</th>
-        <th>Handy-Nummer</th>
+        <th>Phone numbers</th>
         <th></th>
       </tr>
     </ng-template>
@@ -16,7 +16,7 @@
         <td>{{ player.playerId }}</td>
         <td>{{ isAdmin(player) }}</td>
         <td>{{ player.name }}</td>
-        <td>{{ player.state["phoneNumber"] }}</td>
+        <td>{{ getPhoneNumbers(player) }}</td>
         <td class="flex flex-row gap-3">
           <p-button
             (onClick)="teleportToPlayer(player)"
@@ -48,11 +48,68 @@
         <td>{{ call.toPlayerName }}</td>
         <td>{{ call.toPhoneNumber }}</td>
         <td class="flex flex-row gap-3">
-          <p-button icon="pi pi-phone" label="Join call" (onClick)="listenToCall(call)" />
+          <p-button
+            icon="pi pi-phone"
+            label="Join call"
+            (onClick)="listenToCall(call)"
+          />
         </td>
       </tr>
     </ng-template>
   </p-table>
+
+  <p class="text-xl"><i class="pi pi-phone"></i> My phone numbers</p>
+
+  <p-table [value]="adminPhoneNumbers">
+    <ng-template #header>
+      <tr>
+        <th>Display name</th>
+        <th>Phone number</th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-contact>
+      <tr>
+        <td>
+          {{
+            contact.contactName === ""
+              ? "(No display name)"
+              : contact.contactName
+          }}
+        </td>
+        <td>{{ contact.phoneNumber }}</td>
+        <td class="flex flex-row gap-3">
+          <p-button
+            icon="pi pi-phone"
+            label="Delete phone number"
+            (onClick)="deleteAdminNumber(contact)"
+            severity="danger"
+          />
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <div class="flex gap-3">
+    <input
+      placeholder="Display name"
+      pInputText
+      [(ngModel)]="displayNameForNewPhoneNumber"
+      autocomplete="off"
+    />
+    <input
+      placeholder="Phone number"
+      pInputText
+      [(ngModel)]="phoneNumberForNewPhoneNumber"
+      autocomplete="off"
+    />
+    <p-button
+      icon="pi pi-phone"
+      label="Add phone number"
+      (onClick)="addPhoneNumber()"
+      severity="primary"
+    />
+  </div>
 
   <p class="text-xl"><i class="pi pi-indian-rupee"></i> Teleport to areas</p>
 
@@ -65,7 +122,9 @@
     />
   </div>
 
-  <p class="text-xl"><i class="pi pi-volume-up"></i> Play sounds for everyone</p>
+  <p class="text-xl">
+    <i class="pi pi-volume-up"></i> Play sounds for everyone
+  </p>
   <p class="flex gap-3">
     <p-button
       icon="pi pi-play"

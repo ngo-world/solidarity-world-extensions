@@ -11,7 +11,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { WorkadventureService } from '../workadventure.service';
 
-interface Contact {
+export interface Contact {
   contactName: string;
   phoneNumber: string;
 }
@@ -52,30 +52,19 @@ export class SmartphoneComponent implements OnInit {
   phoneNumberToAdd = '';
   contactToAdd = '';
   contacts: Contact[] = [];
+  currentUserPhoneNumber = '';
 
   constructor(private workadventureService: WorkadventureService) {}
 
   getContacts(): Contact[] {
-    const contacts = (WA.player.state['contacts'] as Contact[]) || [];
-    // eslint-disable-next-line no-constant-condition, no-constant-binary-expression
-    if (false && this.workadventureService.isCurrentUserAdmin()) {
-      const playerContacts = this.players.map((i) => {
-        return {
-          contactName: i.name,
-          phoneNumber: (i.state['phoneNumber'] as string) || '',
-        } as Contact;
-      });
-      playerContacts.push(...contacts);
-      return playerContacts;
-    } else {
-      return contacts;
-    }
+    return (WA.player.state['contacts'] as Contact[]) || [];
   }
 
   async ngOnInit(): Promise<void> {
     await this.workadventureService.init();
     console.info('Initializing smartphone screen');
     this.player = this.workadventureService.player!;
+    this.currentUserPhoneNumber = (this.player.state.loadVariable('phoneNumbers') as Contact[])[0].phoneNumber;
     this.showSmartphone = WA.player.state['smartphoneShown'] as boolean;
     this.contacts = this.getContacts();
 
@@ -83,6 +72,7 @@ export class SmartphoneComponent implements OnInit {
       this.players = players;
       this.contacts = this.getContacts();
     });
+
     this.workadventureService.eventsSubject.subscribe((event) => {
       switch (event.name) {
         case 'requestedCall':
@@ -120,7 +110,6 @@ export class SmartphoneComponent implements OnInit {
 
   async joinCall(callRequest: CallRequest, playRingingSound: boolean) {
     console.info('Joining call', callRequest, playRingingSound);
-    this.callRequest = undefined;
 
     await this.player!.state.saveVariable("calling", callRequest, {
       public: true,
@@ -129,7 +118,7 @@ export class SmartphoneComponent implements OnInit {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.api = new (window as any).JitsiMeetExternalAPI(
       jitsiDomain,
-      getJitsiConfig(callRequest.roomName, false, 1, 1),
+      getJitsiConfig(callRequest.roomName, false, 0, 0),
     );
 
     if (playRingingSound) {
@@ -145,8 +134,9 @@ export class SmartphoneComponent implements OnInit {
   }
 
   requestCall(contact: Contact) {
+    console.log(this.players.map(i => i.state['phoneNumbers']));
     const player = this.players.find(
-      (x) => x.state['phoneNumber'] == contact.phoneNumber,
+      (x) => !!(x.state['phoneNumbers'] as Contact[] || []).find(i => i.phoneNumber == contact.phoneNumber),
     );
     if (!player) {
       console.error(
@@ -160,11 +150,12 @@ export class SmartphoneComponent implements OnInit {
 
     const callRequest: CallRequest = {
       fromPlayerName: WA.player.name,
-      fromPhoneNumber: WA.player.state['phoneNumber'] as string,
+      fromPhoneNumber: this.currentUserPhoneNumber,
       toPlayerName: player.name,
-      toPhoneNumber: player.state['phoneNumber'] as string,
+      toPhoneNumber: contact.phoneNumber,
       roomName: getRoomName(WA.player.playerId, player.playerId),
     }
+    this.callRequest = callRequest;
     this.joinCall(callRequest, true);
     WorkadventureService.requestCall(player, callRequest);
   }

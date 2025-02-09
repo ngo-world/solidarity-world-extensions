@@ -13,7 +13,8 @@ import { FormsModule } from '@angular/forms';
 import { add } from 'date-fns';
 
 import { InputMaskModule } from 'primeng/inputmask';
-import { CallRequest } from '../smartphone/smartphone.component';
+import { CallRequest, Contact } from '../smartphone/smartphone.component';
+import { InputTextModule } from 'primeng/inputtext';
 
 interface MapProperty {
   name: string;
@@ -38,6 +39,7 @@ interface MapObject {
     CommonModule,
     TableModule,
     InputNumberModule,
+    InputTextModule,
     FormsModule,
     InputMaskModule,
   ],
@@ -45,6 +47,7 @@ interface MapObject {
   styleUrl: './admin-dashboard.component.scss',
 })
 export class AdminDashboardComponent implements OnInit {
+
   player?: WorkadventurePlayerCommands;
   players: RemotePlayerInterface[] = [];
   api: unknown;
@@ -57,11 +60,14 @@ export class AdminDashboardComponent implements OnInit {
   timeAsString = '11-00';
   developerMode = false;
   calls: CallRequest[] = [];
+  adminPhoneNumbers: Contact[] = [];
+  displayNameForNewPhoneNumber = '';
+  phoneNumberForNewPhoneNumber = '';
 
   constructor(
     private workadventureService: WorkadventureService,
     private router: Router,
-  ) {}
+  ) { }
 
   async ngOnInit(): Promise<void> {
     const element = document.querySelector('html');
@@ -83,6 +89,12 @@ export class AdminDashboardComponent implements OnInit {
       (WA.player.state.loadVariable('developerMode') as boolean) || false;
     WA.player.state.onVariableChange('developerMode').subscribe((value) => {
       this.developerMode = value as boolean;
+    });
+
+    this.adminPhoneNumbers = this.player.state['phoneNumbers'] as Contact[];
+
+    this.player.state.onVariableChange('phoneNumbers').subscribe((value) => {
+      this.adminPhoneNumbers = value as Contact[];
     });
 
     const map = await WA.room.getTiledMap();
@@ -181,5 +193,33 @@ export class AdminDashboardComponent implements OnInit {
   }
   listenToCall(callRequest: CallRequest) {
     window.open(`https://${jitsiDomain}/${callRequest.roomName}`);
+  }
+  getPhoneNumbers(player: RemotePlayerInterface): string {
+    return JSON.stringify(player.state['phoneNumbers'] as Contact[]);
+  }
+
+  deleteAdminNumber(contact: Contact) {
+    let currentNumbers = this.player!.state['phoneNumbers'] as Contact[];
+    currentNumbers = currentNumbers.filter(i => i.contactName !== contact.contactName && i.phoneNumber != contact.phoneNumber);
+    this.player!.state.saveVariable('phoneNumbers', currentNumbers, {
+      public: true,
+      persist: true,
+      scope: "world"
+    });
+  }
+
+  addPhoneNumber() {
+    const contact: Contact = { contactName: this.displayNameForNewPhoneNumber, phoneNumber: this.phoneNumberForNewPhoneNumber };
+
+    if (!contact.contactName || contact.contactName == '') return;
+    if (!contact.phoneNumber || contact.phoneNumber == '') return;
+
+    const currentNumbers = this.player!.state['phoneNumbers'] as Contact[];
+    currentNumbers.push(contact);
+    this.player!.state.saveVariable('phoneNumbers', currentNumbers, {
+      public: true,
+      persist: true,
+      scope: "world"
+    });
   }
 }
