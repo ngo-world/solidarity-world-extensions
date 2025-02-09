@@ -27,13 +27,17 @@ export class WorkadventureService {
 
   player?: WorkadventurePlayerCommands;
 
+  players: RemotePlayerInterface[] = [];
+
   async init() {
+    console.log("WorkadventureService.init");
     await WA.onInit();
     this.player = WA.player;
     await WA.players.configureTracking();
 
     setInterval(async () => {
-      this.playersSubject.next(Array.from(WA.players.list()));
+      this.players = Array.from(WA.players.list())
+      this.playersSubject.next(this.players);
     }, 150);
 
     ['requestedCall', 'declinedCall', 'playSound', 'joinBroadcast'].forEach(
@@ -70,11 +74,15 @@ export class WorkadventureService {
       offsetInSeconds: worldTime.offsetInSeconds,
     });
   }
+
+  getPlayerById(id: number): RemotePlayerInterface | undefined {
+    return WA.players.get(id);
+  }
+
   getVirtualWorldTime(): WorldTime {
     const val = WA.state.loadVariable(
       WorkadventureService.ROOM_STATE_VARIABLE_WORLD_TIME,
     ) as { date: string; offsetInSeconds: number } | undefined;
-    console.log("YEAH", val);
     if (!val) {
       return {
         date: new Date(),

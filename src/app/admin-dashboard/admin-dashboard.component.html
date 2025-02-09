@@ -122,21 +122,31 @@
     />
   </div>
 
-  <p class="text-xl">
-    <i class="pi pi-volume-up"></i> Play sounds for everyone
-  </p>
-  <p class="flex gap-3">
-    <p-button
-      icon="pi pi-play"
-      label="Guitar"
-      (onClick)="playSoundForAll('/map-storage/maps/guitar.mp3')"
-    />
-    <p-button
-      icon="pi pi-play"
-      label="Crowd talking"
-      (onClick)="playSoundForAll('/map-storage/maps/crowd-talking-1.mp3')"
-    />
-  </p>
+  <p class="text-xl"><i class="pi pi-volume-up"></i> Play sounds</p>
+  <div>
+    <div class="mb-3">
+      <p>Select players that should hear the sound:</p>
+      <app-player-selector
+        [players]="players"
+        (selectedPlayers)="selectedPlayersToPlaySound = $event"
+      ></app-player-selector>
+    </div>
+
+    <div class="flex gap-3">
+      <p-button
+        icon="pi pi-play"
+        label="Guitar"
+        (onClick)="playSoundForSelectedPlayers('/map-storage/maps/guitar.mp3')"
+      />
+      <p-button
+        icon="pi pi-play"
+        label="Crowd talking"
+        (onClick)="
+          playSoundForSelectedPlayers('/map-storage/maps/crowd-talking-1.mp3')
+        "
+      />
+    </div>
+  </div>
 
   <p class="text-xl"><i class="pi pi-clock"></i> Time</p>
   <div class="flex gap-3">

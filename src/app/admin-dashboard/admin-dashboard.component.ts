@@ -5,7 +5,6 @@ import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/p
 import { RemotePlayerInterface } from '@workadventure/iframe-api-typings';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { jitsiDomain } from '../smartphone/jitsi-options';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -15,6 +14,7 @@ import { add } from 'date-fns';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CallRequest, Contact } from '../smartphone/smartphone.component';
 import { InputTextModule } from 'primeng/inputtext';
+import { PlayerSelectorComponent } from "../player-selector/player-selector.component";
 
 interface MapProperty {
   name: string;
@@ -42,11 +42,13 @@ interface MapObject {
     InputTextModule,
     FormsModule,
     InputMaskModule,
-  ],
+    PlayerSelectorComponent
+],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
 })
 export class AdminDashboardComponent implements OnInit {
+  selectedPlayersToPlaySound: Set<RemotePlayerInterface> = new Set<RemotePlayerInterface>();
 
   player?: WorkadventurePlayerCommands;
   players: RemotePlayerInterface[] = [];
@@ -63,10 +65,20 @@ export class AdminDashboardComponent implements OnInit {
   adminPhoneNumbers: Contact[] = [];
   displayNameForNewPhoneNumber = '';
   phoneNumberForNewPhoneNumber = '';
+  /*
+  playersTest: RemotePlayerInterface[] = [{
+      name: "yeah",
+      outlineColor: 1,
+      playerId: 0,
+    } as RemotePlayerInterface,{
+      name: "yeah2",
+      outlineColor: 1,
+      playerId: 1,
+    } as RemotePlayerInterface];
+     */
 
   constructor(
     private workadventureService: WorkadventureService,
-    private router: Router,
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -82,6 +94,7 @@ export class AdminDashboardComponent implements OnInit {
       this.calls = this.getCalls(players);
     });
 
+
     this.objectsWithOpenWebsiteProperty = await this.getAllDocumentLinksInMap();
     console.log(this.objectsWithOpenWebsiteProperty);
 
@@ -96,6 +109,7 @@ export class AdminDashboardComponent implements OnInit {
     this.player.state.onVariableChange('phoneNumbers').subscribe((value) => {
       this.adminPhoneNumbers = value as Contact[];
     });
+    
 
     const map = await WA.room.getTiledMap();
     this.objects = map.layers
@@ -123,8 +137,8 @@ export class AdminDashboardComponent implements OnInit {
     return players.filter((i) => !!i.state['calling']).map((i) => i.state['calling'] as CallRequest);
   }
 
-  playSoundForAll(soundUrl: string): void {
-    WA.event.broadcast('playSound', soundUrl);
+  playSoundForSelectedPlayers(soundUrl: string): void {
+    Array.from(this.selectedPlayersToPlaySound).forEach(p => p.sendEvent('playSound', soundUrl));
   }
 
   joinCall(targetPlayer: RemotePlayerInterface): void {
