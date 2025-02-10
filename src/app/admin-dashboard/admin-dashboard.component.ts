@@ -30,6 +30,11 @@ interface MapObject {
   height?: number;
 }
 
+export interface SetVariableEvent {
+  variableName: string;
+  variableValue: unknown;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -66,25 +71,13 @@ export class AdminDashboardComponent implements OnInit {
   adminPhoneNumbers: Contact[] = [];
   displayNameForNewPhoneNumber = '';
   phoneNumberForNewPhoneNumber = '';
-  /*
-  playersTest: RemotePlayerInterface[] = [{
-      name: "yeah",
-      outlineColor: 1,
-      playerId: 0,
-    } as RemotePlayerInterface,{
-      name: "yeah2",
-      outlineColor: 1,
-      playerId: 1,
-    } as RemotePlayerInterface];
-     */
+  playerDocuments: Record<number, string> = {};
 
   constructor(private workadventureService: WorkadventureService) {}
 
   async ngOnInit(): Promise<void> {
-    const element = document.querySelector('html');
-    element?.classList.toggle('dark-mode');
+    document.querySelector('html')?.classList.toggle('dark-mode');
 
-    console.log('ngOnInit');
     await this.workadventureService.init();
 
     this.player = this.workadventureService.player!;
@@ -210,7 +203,9 @@ export class AdminDashboardComponent implements OnInit {
     window.open(`https://${jitsiDomain}/${callRequest.roomName}`);
   }
   getPhoneNumbers(player: RemotePlayerInterface): string {
-    return JSON.stringify(player.state['phoneNumbers'] as Contact[]);
+    return (player.state['phoneNumbers'] as Contact[])
+      .map((i) => `${i.contactName || '(no alias)'}: ${i.phoneNumber}`)
+      .join('\n');
   }
 
   deleteAdminNumber(contact: Contact) {
@@ -245,7 +240,29 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  openGoogleDrive() {
-    //
+  openDocument(player: RemotePlayerInterface) {
+    const documentLink = player.state['document'] as string;
+    window.open(documentLink);
+  }
+  setPlayerDocument($event: Event, player: RemotePlayerInterface) {
+    this.setVariableOnRemotePlayer(player, {
+      variableName: 'document',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      variableValue: ($event.target as any).value,
+    } as SetVariableEvent);
+  }
+
+  setVariableOnRemotePlayer(
+    player: RemotePlayerInterface,
+    event: SetVariableEvent,
+  ) {
+    player.sendEvent('setVariable', event);
+  }
+
+  togglePhone(player: RemotePlayerInterface) {
+    this.setVariableOnRemotePlayer(player, {
+      variableName: 'phoneDisabled',
+      variableValue: !player.state['phoneDisabled'],
+    } as SetVariableEvent);
   }
 }

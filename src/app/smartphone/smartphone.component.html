@@ -5,7 +5,7 @@
     opacity: showSmartphone ? 1 : 0,
   }"
 >
-  <div class="holder">
+  <div class="holder" *ngIf="player">
     <!--
     callrequest: {{!!callRequest}}, callingTargetPlayer: {{!!callingTargetPlayer}}, api: {{!!api}}
     -->
@@ -14,121 +14,128 @@
       <br />
       {{ currentUserPhoneNumber }}
     </div>
-    <!-- Another user calls this user -->
-    <div
-      *ngIf="
-        !api && callRequest && callRequest?.fromPlayerName !== player?.name
-      "
-      class="content-center grid justify-items-center"
-    >
-      <p class="mb-4">
-        <b>{{ callRequest.fromPlayerName }}</b>
-        <br />
-        ({{ callRequest.fromPhoneNumber }})
-      </p>
-      <div class="grid grid-cols-2 justify-items-center">
-        <p-button
-          label="Accept"
-          icon="pi pi-phone"
-          (onClick)="acceptCall()"
-          [raised]="true"
-        />
-        <p-button
-          label="Decline"
-          icon="pi pi-times"
-          (onClick)="stopCall()"
-          severity="danger"
-          [raised]="true"
-        />
-      </div>
+    <div class=" text-red-500 text-center text-lg" *ngIf="!phoneEnabled">
+      <i class="pi pi-exclamation-triangle inline-block mr-2" style="font-size: 1.2em;"></i>
+      <span class="inline-block mr-2">Your phone is not working</span> 
+      <i class="pi pi-exclamation-triangle inline-block" style="font-size: 1.2em;"></i>
     </div>
-    <!-- This user calls another user -->
-    <div
-      *ngIf="api && callRequest?.fromPlayerName === player?.name"
-      class="content-center grid justify-items-center"
-    >
-      <p class="mb-4">
-        <b>{{ callRequest!.fromPlayerName }}</b>
-        <br />
-        ({{ callRequest!.fromPhoneNumber }})
-      </p>
-      <p-button
-        label="Stop call"
-        icon="pi pi-times"
-        (click)="stopCall()"
-        [raised]="true"
-        severity="danger"
-      ></p-button>
-    </div>
-    <!-- This user is in a call with another user -->
-    <div
-      *ngIf="api && callRequest?.fromPlayerName !== player?.name"
-      class="content-center grid justify-items-center"
-    >
-      <p class="mb-4">
-        <b>{{ callRequest!.toPlayerName }}</b>
-        <br />
-        ({{ callRequest!.toPhoneNumber }})
-      </p>
-      <p-button
-        label="Stop call"
-        icon="pi pi-times"
-        (click)="stopCall()"
-        [raised]="true"
-        severity="danger"
-      ></p-button>
-    </div>
-    <!-- Contacts -->
-    <div *ngIf="!api && !callRequest" class="flex flex-col gap-2">
-      <h2 class="text-xl mb-3">Contacts</h2>
-      <div class="mb-4">
-        <div *ngIf="contacts.length === 0">No contacts added yet.</div>
-        <div
-          *ngFor="let contact of contacts"
-          class="grid grid-cols-6 items-center"
-        >
-          <div class="col-span-4 p-2">
-            {{ contact.contactName }}
-            <br />
-            {{ contact.phoneNumber }}
-          </div>
+    <div *ngIf="phoneEnabled">
+      <!-- Another user calls this user -->
+      <div
+        *ngIf="
+          !api && callRequest && callRequest?.fromPlayerName !== player?.name
+        "
+        class="content-center grid justify-items-center"
+      >
+        <p class="mb-4">
+          <b>{{ callRequest.fromPlayerName }}</b>
+          <br />
+          ({{ callRequest.fromPhoneNumber }})
+        </p>
+        <div class="grid grid-cols-2 justify-items-center">
           <p-button
-            class="justify-self-end"
+            label="Accept"
             icon="pi pi-phone"
-            (click)="requestCall(contact)"
+            (onClick)="acceptCall()"
             [raised]="true"
-          ></p-button>
+          />
           <p-button
-            class="justify-self-end"
+            label="Decline"
             icon="pi pi-times"
-            (click)="removeContact(contact)"
-            [raised]="true"
+            (onClick)="stopCall()"
             severity="danger"
-          ></p-button>
+            [raised]="true"
+          />
         </div>
       </div>
-      <h2 class="text-xl mb-1">Add contact</h2>
-      <input
-        class="mb-1"
-        placeholder="Name"
-        pInputText
-        [(ngModel)]="contactToAdd"
-        autocomplete="off"
-      />
-      <input
-        class="mb-1"
-        placeholder="Phone number"
-        pInputText
-        [(ngModel)]="phoneNumberToAdd"
-        autocomplete="off"
-      />
-      <p-button
-        [disabled]="
-          contactToAdd.trim() === '' || phoneNumberToAdd.trim() === ''
-        "
-        (onClick)="addContact(contactToAdd, phoneNumberToAdd)"
-        label="Add contact"
-      />
+      <!-- This user calls another user -->
+      <div
+        *ngIf="api && callRequest?.fromPlayerName === player?.name"
+        class="content-center grid justify-items-center"
+      >
+        <p class="mb-4">
+          <b>{{ callRequest!.fromPlayerName }}</b>
+          <br />
+          ({{ callRequest!.fromPhoneNumber }})
+        </p>
+        <p-button
+          label="Stop call"
+          icon="pi pi-times"
+          (click)="stopCall()"
+          [raised]="true"
+          severity="danger"
+        ></p-button>
+      </div>
+      <!-- This user is in a call with another user -->
+      <div
+        *ngIf="api && callRequest?.fromPlayerName !== player?.name"
+        class="content-center grid justify-items-center"
+      >
+        <p class="mb-4">
+          <b>{{ callRequest!.toPlayerName }}</b>
+          <br />
+          ({{ callRequest!.toPhoneNumber }})
+        </p>
+        <p-button
+          label="Stop call"
+          icon="pi pi-times"
+          (click)="stopCall()"
+          [raised]="true"
+          severity="danger"
+        ></p-button>
+      </div>
+      <!-- Contacts -->
+      <div *ngIf="!api && !callRequest" class="flex flex-col gap-2">
+        <h2 class="text-xl mb-3">Contacts</h2>
+        <div class="mb-4">
+          <div *ngIf="contacts.length === 0">No contacts added yet.</div>
+          <div
+            *ngFor="let contact of contacts"
+            class="grid grid-cols-6 items-center"
+          >
+            <div class="col-span-4 p-2">
+              {{ contact.contactName }}
+              <br />
+              {{ contact.phoneNumber }}
+            </div>
+            <p-button
+              class="justify-self-end"
+              icon="pi pi-phone"
+              (click)="requestCall(contact)"
+              [raised]="true"
+            ></p-button>
+            <p-button
+              class="justify-self-end"
+              icon="pi pi-times"
+              (click)="removeContact(contact)"
+              [raised]="true"
+              severity="danger"
+            ></p-button>
+          </div>
+        </div>
+        <h2 class="text-xl mb-1">Add contact</h2>
+        <input
+          class="mb-1"
+          placeholder="Name"
+          pInputText
+          [(ngModel)]="contactToAdd"
+          autocomplete="off"
+        />
+        <input
+          class="mb-1"
+          placeholder="Phone number"
+          pInputText
+          [(ngModel)]="phoneNumberToAdd"
+          autocomplete="off"
+        />
+        <p-button
+          [disabled]="
+            contactToAdd.trim() === '' || phoneNumberToAdd.trim() === ''
+          "
+          (onClick)="addContact(contactToAdd, phoneNumberToAdd)"
+          label="Add contact"
+        />
+      </div>
     </div>
   </div>
 </div>

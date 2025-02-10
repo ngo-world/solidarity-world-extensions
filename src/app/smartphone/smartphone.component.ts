@@ -53,6 +53,7 @@ export class SmartphoneComponent implements OnInit {
   contactToAdd = '';
   contacts: Contact[] = [];
   currentUserPhoneNumber = '';
+  phoneEnabled = false;
 
   constructor(private workadventureService: WorkadventureService) {}
 
@@ -75,9 +76,18 @@ export class SmartphoneComponent implements OnInit {
       this.contacts = this.getContacts();
     });
 
+    this.phoneEnabled = !this.player?.state['phoneDisabled'] as boolean;
+    this.player.state.onVariableChange('phoneDisabled').subscribe(() => {
+      this.phoneEnabled = !this.player?.state['phoneDisabled'] as boolean;
+    });
+
     this.workadventureService.eventsSubject.subscribe((event) => {
       switch (event.name) {
         case 'requestedCall':
+          if (!this.phoneEnabled) {
+            console.error('Got call but phone is disabled');
+            return;
+          }
           console.log('User requests call', event);
           this.onCallRequested(event.data as CallRequest, event.senderId!);
           this.showSmartphone = true;
@@ -88,7 +98,7 @@ export class SmartphoneComponent implements OnInit {
           this.stopCall();
           break;
         default:
-          console.info('Received unknown event. Ignoring', event);
+          console.error('Received unknown event. Ignoring', event);
           break;
       }
     });

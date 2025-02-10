@@ -3,6 +3,7 @@ import { WorkadventureService, WorldTime } from '../workadventure.service';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { CommonModule } from '@angular/common';
 import { isBefore } from 'date-fns';
+import { SetVariableEvent } from '../admin-dashboard/admin-dashboard.component';
 
 @Component({
   selector: 'app-background',
@@ -29,12 +30,37 @@ export class BackgroundComponent implements OnInit {
     await this.workadventureService.init();
     this.player = this.workadventureService.player!;
 
+    this.initUi();
+
+    WA.ui.actionBar.addButton({
+      id: 'openDocument',
+      label: 'Open document',
+      callback: () => {
+        WA.nav.openCoWebSite(
+          this.player!.state.loadVariable('document') as string,
+        );
+      },
+    });
+
     this.workadventureService.eventsSubject.subscribe((event) => {
       console.log('Received event in background: ', event);
       switch (event.name) {
         case 'playSound':
           this.playSound(event.data! as string);
           break;
+        case 'setVariable': {
+          const setVariableEvent = event.data as unknown as SetVariableEvent;
+          this.player?.state.saveVariable(
+            setVariableEvent.variableName,
+            setVariableEvent.variableValue,
+            {
+              persist: true,
+              public: true,
+              scope: 'world',
+            },
+          );
+          break;
+        }
         case 'joinBroadcast': {
           const roomname = event.data! as string;
           this.joinBroadcast(roomname);
@@ -65,6 +91,9 @@ export class BackgroundComponent implements OnInit {
         // Important: do NOT use the value directy
         this.worldtime = this.workadventureService.getVirtualWorldTime();
       });
+  }
+  initUi() {
+    console.error('Implement');
   }
 
   getCurrentCountdown(): string {

@@ -5,25 +5,49 @@
     <ng-template #header>
       <tr>
         <th>ID</th>
-        <th>Is admin?</th>
         <th>Name</th>
         <th>Phone numbers</th>
+        <th>Document link</th>
         <th></th>
       </tr>
     </ng-template>
     <ng-template #body let-player>
       <tr>
         <td>{{ player.playerId }}</td>
-        <td>{{ isAdmin(player) }}</td>
         <td>{{ player.name }}</td>
         <td>{{ getPhoneNumbers(player) }}</td>
-        <td class="flex flex-row gap-3">
-          <p-button
-            (onClick)="teleportToPlayer(player)"
-            icon="pi pi-indian-rupee"
-            label="Teleport"
+        <td>
+          <div class="flex flex-row gap-3">
+          <input
+            pInputText
+            [value]="player.state['document']"
+            (change)="setPlayerDocument($event, player)"
           />
-          <p-button icon="pi pi-phone" label="Call" (onClick)="call(player)" />
+          <p-button
+            icon="pi pi-link"
+            label="Open document"
+            (onClick)="openDocument(player)"
+          />
+          </div>
+        </td>
+        <td>
+          <div class="flex flex-row gap-3">
+            <p-button
+              (onClick)="teleportToPlayer(player)"
+              icon="pi pi-indian-rupee"
+              label="Teleport"
+            />
+            <p-button
+              icon="pi pi-phone"
+              label="Call"
+              (onClick)="call(player)"
+            />
+            <p-button
+              [label]="player.state['phoneDisabled'] ? 'Enable phone' : 'Disable phone'"
+              (onClick)="togglePhone(player)"
+              [severity]="player.state['phoneDisabled'] ? 'primary' : 'danger'"
+            />
+          </div>
         </td>
       </tr>
     </ng-template>
@@ -182,5 +206,4 @@
     (onClick)="toggleDeveloperMode()"
     [severity]="developerMode ? 'primary' : 'danger'"
   />
-  <p-button label="Open Google Drive" (onClick)="openGoogleDrive()" />
 </div>

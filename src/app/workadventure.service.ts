@@ -40,9 +40,14 @@ export class WorkadventureService {
       this.playersSubject.next(this.players);
     }, 150);
 
-    ['requestedCall', 'declinedCall', 'playSound', 'joinBroadcast'].forEach(
-      (eventName) =>
-        WA.event.on(eventName).subscribe((e) => this.eventsSubject.next(e)),
+    [
+      'requestedCall',
+      'declinedCall',
+      'playSound',
+      'joinBroadcast',
+      'setVariable',
+    ].forEach((eventName) =>
+      WA.event.on(eventName).subscribe((e) => this.eventsSubject.next(e)),
     );
   }
 
