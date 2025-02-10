@@ -64,7 +64,9 @@ export class SmartphoneComponent implements OnInit {
     await this.workadventureService.init();
     console.info('Initializing smartphone screen');
     this.player = this.workadventureService.player!;
-    this.currentUserPhoneNumber = (this.player.state.loadVariable('phoneNumbers') as Contact[])[0].phoneNumber;
+    this.currentUserPhoneNumber = (
+      this.player.state.loadVariable('phoneNumbers') as Contact[]
+    )[0].phoneNumber;
     this.showSmartphone = WA.player.state['smartphoneShown'] as boolean;
     this.contacts = this.getContacts();
 
@@ -111,7 +113,7 @@ export class SmartphoneComponent implements OnInit {
   async joinCall(callRequest: CallRequest, playRingingSound: boolean) {
     console.info('Joining call', callRequest, playRingingSound);
 
-    await this.player!.state.saveVariable("calling", callRequest, {
+    await this.player!.state.saveVariable('calling', callRequest, {
       public: true,
       persist: false,
     });
@@ -134,9 +136,12 @@ export class SmartphoneComponent implements OnInit {
   }
 
   requestCall(contact: Contact) {
-    console.log(this.players.map(i => i.state['phoneNumbers']));
+    console.log(this.players.map((i) => i.state['phoneNumbers']));
     const player = this.players.find(
-      (x) => !!(x.state['phoneNumbers'] as Contact[] || []).find(i => i.phoneNumber == contact.phoneNumber),
+      (x) =>
+        !!((x.state['phoneNumbers'] as Contact[]) || []).find(
+          (i) => i.phoneNumber == contact.phoneNumber,
+        ),
     );
     if (!player) {
       console.error(
@@ -154,7 +159,7 @@ export class SmartphoneComponent implements OnInit {
       toPlayerName: player.name,
       toPhoneNumber: contact.phoneNumber,
       roomName: getRoomName(WA.player.playerId, player.playerId),
-    }
+    };
     this.callRequest = callRequest;
     this.joinCall(callRequest, true);
     WorkadventureService.requestCall(player, callRequest);
@@ -163,7 +168,7 @@ export class SmartphoneComponent implements OnInit {
   async stopCall() {
     console.log('Stopping call');
 
-    await this.player!.state.saveVariable("calling", null, {
+    await this.player!.state.saveVariable('calling', null, {
       public: true,
       persist: false,
     });

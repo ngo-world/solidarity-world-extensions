@@ -83,7 +83,7 @@ export class BackgroundComponent implements OnInit {
       (new Date().getTime() - this.worldtime.date.getTime()) / 1000 +
       this.worldtime.offsetInSeconds;
     return (
-      Math.floor(worldtimeDate / 60 / 60)
+      Math.floor((worldtimeDate / 60 / 60) % 24)
         .toString()
         .padStart(2, '0') +
       ':' +

@@ -16,7 +16,9 @@
     </div>
     <!-- Another user calls this user -->
     <div
-      *ngIf="!api && callRequest && callRequest?.fromPlayerName !== player?.name"
+      *ngIf="
+        !api && callRequest && callRequest?.fromPlayerName !== player?.name
+      "
       class="content-center grid justify-items-center"
     >
       <p class="mb-4">
@@ -41,7 +43,10 @@
       </div>
     </div>
     <!-- This user calls another user -->
-    <div *ngIf="api && callRequest?.fromPlayerName === player?.name" class="content-center grid justify-items-center">
+    <div
+      *ngIf="api && callRequest?.fromPlayerName === player?.name"
+      class="content-center grid justify-items-center"
+    >
       <p class="mb-4">
         <b>{{ callRequest!.fromPlayerName }}</b>
         <br />
@@ -56,7 +61,10 @@
       ></p-button>
     </div>
     <!-- This user is in a call with another user -->
-    <div *ngIf="api && callRequest?.fromPlayerName !== player?.name" class="content-center grid justify-items-center">
+    <div
+      *ngIf="api && callRequest?.fromPlayerName !== player?.name"
+      class="content-center grid justify-items-center"
+    >
       <p class="mb-4">
         <b>{{ callRequest!.toPlayerName }}</b>
         <br />

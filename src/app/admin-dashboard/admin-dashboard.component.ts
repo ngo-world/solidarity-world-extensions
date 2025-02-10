@@ -14,7 +14,7 @@ import { add } from 'date-fns';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CallRequest, Contact } from '../smartphone/smartphone.component';
 import { InputTextModule } from 'primeng/inputtext';
-import { PlayerSelectorComponent } from "../player-selector/player-selector.component";
+import { PlayerSelectorComponent } from '../player-selector/player-selector.component';
 
 interface MapProperty {
   name: string;
@@ -42,13 +42,14 @@ interface MapObject {
     InputTextModule,
     FormsModule,
     InputMaskModule,
-    PlayerSelectorComponent
-],
+    PlayerSelectorComponent,
+  ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
 })
 export class AdminDashboardComponent implements OnInit {
-  selectedPlayersToPlaySound: Set<RemotePlayerInterface> = new Set<RemotePlayerInterface>();
+  selectedPlayersToPlaySound: Set<RemotePlayerInterface> =
+    new Set<RemotePlayerInterface>();
 
   player?: WorkadventurePlayerCommands;
   players: RemotePlayerInterface[] = [];
@@ -77,9 +78,7 @@ export class AdminDashboardComponent implements OnInit {
     } as RemotePlayerInterface];
      */
 
-  constructor(
-    private workadventureService: WorkadventureService,
-  ) { }
+  constructor(private workadventureService: WorkadventureService) {}
 
   async ngOnInit(): Promise<void> {
     const element = document.querySelector('html');
@@ -93,7 +92,6 @@ export class AdminDashboardComponent implements OnInit {
       this.players = players;
       this.calls = this.getCalls(players);
     });
-
 
     this.objectsWithOpenWebsiteProperty = await this.getAllDocumentLinksInMap();
     console.log(this.objectsWithOpenWebsiteProperty);
@@ -109,7 +107,6 @@ export class AdminDashboardComponent implements OnInit {
     this.player.state.onVariableChange('phoneNumbers').subscribe((value) => {
       this.adminPhoneNumbers = value as Contact[];
     });
-    
 
     const map = await WA.room.getTiledMap();
     this.objects = map.layers
@@ -134,11 +131,15 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   getCalls(players: RemotePlayerInterface[]): CallRequest[] {
-    return players.filter((i) => !!i.state['calling']).map((i) => i.state['calling'] as CallRequest);
+    return players
+      .filter((i) => !!i.state['calling'])
+      .map((i) => i.state['calling'] as CallRequest);
   }
 
   playSoundForSelectedPlayers(soundUrl: string): void {
-    Array.from(this.selectedPlayersToPlaySound).forEach(p => p.sendEvent('playSound', soundUrl));
+    Array.from(this.selectedPlayersToPlaySound).forEach((p) =>
+      p.sendEvent('playSound', soundUrl),
+    );
   }
 
   joinCall(targetPlayer: RemotePlayerInterface): void {
@@ -154,11 +155,11 @@ export class AdminDashboardComponent implements OnInit {
 
   call(targetPlayer: RemotePlayerInterface) {
     const callRequest: CallRequest = {
-      fromPhoneNumber: "+111111111",
-      fromPlayerName: "Admin",
+      fromPhoneNumber: '+111111111',
+      fromPlayerName: 'Admin',
       toPhoneNumber: targetPlayer.state['phoneNumber'] as string,
       toPlayerName: targetPlayer.name,
-      roomName: 'admin_to_player_'
+      roomName: 'admin_to_player_',
     };
     WorkadventureService.requestCall(targetPlayer, callRequest);
     window.open(`https://${jitsiDomain}/${callRequest.roomName}`);
@@ -214,16 +215,23 @@ export class AdminDashboardComponent implements OnInit {
 
   deleteAdminNumber(contact: Contact) {
     let currentNumbers = this.player!.state['phoneNumbers'] as Contact[];
-    currentNumbers = currentNumbers.filter(i => i.contactName !== contact.contactName && i.phoneNumber != contact.phoneNumber);
+    currentNumbers = currentNumbers.filter(
+      (i) =>
+        i.contactName !== contact.contactName &&
+        i.phoneNumber != contact.phoneNumber,
+    );
     this.player!.state.saveVariable('phoneNumbers', currentNumbers, {
       public: true,
       persist: true,
-      scope: "world"
+      scope: 'world',
     });
   }
 
   addPhoneNumber() {
-    const contact: Contact = { contactName: this.displayNameForNewPhoneNumber, phoneNumber: this.phoneNumberForNewPhoneNumber };
+    const contact: Contact = {
+      contactName: this.displayNameForNewPhoneNumber,
+      phoneNumber: this.phoneNumberForNewPhoneNumber,
+    };
 
     if (!contact.contactName || contact.contactName == '') return;
     if (!contact.phoneNumber || contact.phoneNumber == '') return;
@@ -233,7 +241,11 @@ export class AdminDashboardComponent implements OnInit {
     this.player!.state.saveVariable('phoneNumbers', currentNumbers, {
       public: true,
       persist: true,
-      scope: "world"
+      scope: 'world',
     });
+  }
+
+  openGoogleDrive() {
+    //
   }
 }

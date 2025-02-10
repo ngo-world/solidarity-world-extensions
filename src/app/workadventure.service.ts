@@ -30,13 +30,13 @@ export class WorkadventureService {
   players: RemotePlayerInterface[] = [];
 
   async init() {
-    console.log("WorkadventureService.init");
+    console.log('WorkadventureService.init');
     await WA.onInit();
     this.player = WA.player;
     await WA.players.configureTracking();
 
     setInterval(async () => {
-      this.players = Array.from(WA.players.list())
+      this.players = Array.from(WA.players.list());
       this.playersSubject.next(this.players);
     }, 150);
 
@@ -104,7 +104,10 @@ export class WorkadventureService {
       : 'https://web.solidarity-world.de';
   }
 
-  static requestCall(targetPlayer: RemotePlayerInterface, callRequest: CallRequest) {
+  static requestCall(
+    targetPlayer: RemotePlayerInterface,
+    callRequest: CallRequest,
+  ) {
     targetPlayer.sendEvent('requestedCall', callRequest);
   }
 }
