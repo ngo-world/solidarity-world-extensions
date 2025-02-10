@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { WorkadventureService, WorldTime } from '../workadventure.service';
+import {
+  BroadcastEvents,
+  WorkadventureService,
+  WorldTime,
+} from '../workadventure.service';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { CommonModule } from '@angular/common';
 import { isBefore } from 'date-fns';
@@ -22,15 +26,14 @@ export class BackgroundComponent implements OnInit {
   currentCountdownDate?: Date;
   api: unknown;
 
-  constructor(private workadventureService: WorkadventureService) {
-    console.info('BackgroundComponent');
-  }
+  constructor(private workadventureService: WorkadventureService) {}
 
   async ngOnInit(): Promise<void> {
+    console.info('BackgroundComponent.ngOnInit');
     await this.workadventureService.init();
+    await this.workadventureService.initUser();
     this.player = this.workadventureService.player!;
-
-    this.initUi();
+    console.info('Player', this.player);
 
     WA.ui.actionBar.addButton({
       id: 'openDocument',
@@ -45,10 +48,10 @@ export class BackgroundComponent implements OnInit {
     this.workadventureService.eventsSubject.subscribe((event) => {
       console.log('Received event in background: ', event);
       switch (event.name) {
-        case 'playSound':
+        case BroadcastEvents.PLAY_SOUND:
           this.playSound(event.data! as string);
           break;
-        case 'setVariable': {
+        case BroadcastEvents.SET_VARIABLE: {
           const setVariableEvent = event.data as unknown as SetVariableEvent;
           this.player?.state.saveVariable(
             setVariableEvent.variableName,
@@ -61,7 +64,7 @@ export class BackgroundComponent implements OnInit {
           );
           break;
         }
-        case 'joinBroadcast': {
+        case BroadcastEvents.JOIN_BROADCAST: {
           const roomname = event.data! as string;
           this.joinBroadcast(roomname);
           break;
@@ -91,9 +94,6 @@ export class BackgroundComponent implements OnInit {
         // Important: do NOT use the value directy
         this.worldtime = this.workadventureService.getVirtualWorldTime();
       });
-  }
-  initUi() {
-    console.error('Implement');
   }
 
   getCurrentCountdown(): string {

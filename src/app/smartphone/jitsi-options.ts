@@ -1,8 +1,8 @@
 export const jitsiDomain = 'jitsi-meet.solidarity-world.de';
 //export const jitsiDomain: String = "meet.ffrn.de";
 
-export function getRoomName(playerId1: number, playerId2: number) {
-  return `sadjlaskjdal_${playerId1}_to_${playerId2}`;
+export function getRoomName(phoneNumberA: string, phoneNumberB: string) {
+  return `_phone_call_${phoneNumberA}_${phoneNumberB}`;
 }
 
 export function getJitsiConfig(

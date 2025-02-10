@@ -6,18 +6,21 @@
   }"
 >
   <div class="holder" *ngIf="player">
-    <!--
-    callrequest: {{!!callRequest}}, callingTargetPlayer: {{!!callingTargetPlayer}}, api: {{!!api}}
-    -->
     <div *ngIf="player" class="text-center mb-4">
       <b class="text-xl">My phone number:</b>
       <br />
-      {{ currentUserPhoneNumber }}
+      {{ currentUserPhoneNumbers[0].phoneNumber }}
     </div>
-    <div class=" text-red-500 text-center text-lg" *ngIf="!phoneEnabled">
-      <i class="pi pi-exclamation-triangle inline-block mr-2" style="font-size: 1.2em;"></i>
-      <span class="inline-block mr-2">Your phone is not working</span> 
-      <i class="pi pi-exclamation-triangle inline-block" style="font-size: 1.2em;"></i>
+    <div class="text-red-500 text-center text-lg" *ngIf="!phoneEnabled">
+      <i
+        class="pi pi-exclamation-triangle inline-block mr-2"
+        style="font-size: 1.2em"
+      ></i>
+      <span class="inline-block mr-2">Your phone is not working</span>
+      <i
+        class="pi pi-exclamation-triangle inline-block"
+        style="font-size: 1.2em"
+      ></i>
     </div>
     <div *ngIf="phoneEnabled">
       <!-- Another user calls this user -->
@@ -42,7 +45,7 @@
           <p-button
             label="Decline"
             icon="pi pi-times"
-            (onClick)="stopCall()"
+            (onClick)="stopCall('Player declined')"
             severity="danger"
             [raised]="true"
           />
@@ -54,24 +57,6 @@
         class="content-center grid justify-items-center"
       >
         <p class="mb-4">
-          <b>{{ callRequest!.fromPlayerName }}</b>
-          <br />
-          ({{ callRequest!.fromPhoneNumber }})
-        </p>
-        <p-button
-          label="Stop call"
-          icon="pi pi-times"
-          (click)="stopCall()"
-          [raised]="true"
-          severity="danger"
-        ></p-button>
-      </div>
-      <!-- This user is in a call with another user -->
-      <div
-        *ngIf="api && callRequest?.fromPlayerName !== player?.name"
-        class="content-center grid justify-items-center"
-      >
-        <p class="mb-4">
           <b>{{ callRequest!.toPlayerName }}</b>
           <br />
           ({{ callRequest!.toPhoneNumber }})
@@ -79,7 +64,25 @@
         <p-button
           label="Stop call"
           icon="pi pi-times"
-          (click)="stopCall()"
+          (click)="stopCall('Player stopped call manually')"
+          [raised]="true"
+          severity="danger"
+        ></p-button>
+      </div>
+      <!-- This user was called by another user -->
+      <div
+        *ngIf="api && callRequest?.fromPlayerName !== player?.name"
+        class="content-center grid justify-items-center"
+      >
+        <p class="mb-4">
+          <b>{{ callRequest!.fromPlayerName }}</b>
+          <br />
+          ({{ callRequest!.fromPhoneNumber }})
+        </p>
+        <p-button
+          label="Stop call"
+          icon="pi pi-times"
+          (click)="stopCall('Player stopped call manually')"
           [raised]="true"
           severity="danger"
         ></p-button>

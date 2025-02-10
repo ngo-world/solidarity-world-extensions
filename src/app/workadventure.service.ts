@@ -15,6 +15,28 @@ export interface WorldTime {
   offsetInSeconds: number;
 }
 
+interface MapProperty {
+  name: string;
+  value: string;
+  type: string;
+}
+
+export enum PlayerStateVariables {
+  PHONE_NUMBERS = 'phoneNumbers',
+  PHONE_DISABLED = 'phoneDisabled',
+  SMARTPHONE_SHOWN = 'smartphoneShown',
+  CALLING = 'calling',
+}
+
+export enum BroadcastEvents {
+  REQUEST_CALL = 'requestCall',
+  CALL_DECLINED = 'callDeclined',
+  PLAY_SOUND = 'playSound',
+  JOIN_BROADCAST = 'joinBroadcast',
+  SET_VARIABLE = 'setVariable',
+  SHARE_PHONE_NUMBER = 'sharePhoneNumber',
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -40,15 +62,60 @@ export class WorkadventureService {
       this.playersSubject.next(this.players);
     }, 150);
 
-    [
-      'requestedCall',
-      'declinedCall',
-      'playSound',
-      'joinBroadcast',
-      'setVariable',
-    ].forEach((eventName) =>
-      WA.event.on(eventName).subscribe((e) => this.eventsSubject.next(e)),
+    Object.values(BroadcastEvents).forEach((eventName) =>
+      WA.event.on(eventName).subscribe((e) => {
+        console.log(`Received event.`, e);
+        this.eventsSubject.next(e);
+      }),
     );
+  }
+
+  async initUser() {
+    if (!WA.player.state.hasVariable('phoneNumbers')) {
+      const phoneNumber = WorkadventureService.getRandomPhoneNumber();
+      console.info(`Saving random phone number: ${phoneNumber}`);
+      WA.player.state.saveVariable(
+        'phoneNumbers',
+        [{ contactName: '', phoneNumber }],
+        {
+          public: true,
+          persist: true,
+          scope: 'world',
+        },
+      );
+    }
+
+    WA.controls.disableInviteButton();
+
+    if (!WorkadventureService.currentUserIsAdmin()) {
+      WA.controls.disableMapEditor();
+      WA.controls.disableScreenSharing();
+      WA.controls.disableWheelZoom();
+      // WA.controls.disableRightClick();
+      // WA.controls.disableMicrophone();
+      // WA.controls.disableWebcam();
+    }
+
+    await WA.player.state.saveVariable('smartphoneShown', false);
+
+    WA.ui.actionBar.addButton({
+      id: 'toggleSmartPhoneButton',
+      label: 'Toggle smartphone',
+      callback: async () => {
+        WA.player.state.saveVariable(
+          'smartphoneShown',
+          !WA.player.state['smartphoneShown'],
+        );
+      },
+    });
+
+    if (WorkadventureService.currentUserIsAdmin()) {
+      WA.ui.actionBar.addButton({
+        id: 'openAdminDashboard',
+        label: 'Open admin dashboard',
+        callback: () => WorkadventureService.openAdminDashboard(),
+      });
+    }
   }
 
   isUserAdmin(userUuid: string): boolean {
@@ -101,6 +168,18 @@ export class WorkadventureService {
     };
   }
 
+  static requestCall(callRequest: CallRequest) {
+    WA.event.broadcast(BroadcastEvents.REQUEST_CALL, callRequest);
+    //targetPlayer.sendEvent('requestedCall', callRequest);
+  }
+
+  static getRandomPhoneNumber() {
+    const min = 330000000;
+    const max = 509999999;
+    const randomNumber = Math.floor(Math.random() * (max - min) + min);
+    return `+${randomNumber}`;
+  }
+
   static getSolidarityWorldUrl() {
     const developerMode =
       WA.player.state.loadVariable('developerMode') || false;
@@ -109,10 +188,41 @@ export class WorkadventureService {
       : 'https://web.solidarity-world.de';
   }
 
-  static requestCall(
-    targetPlayer: RemotePlayerInterface,
-    callRequest: CallRequest,
-  ) {
-    targetPlayer.sendEvent('requestedCall', callRequest);
+  static openAdminDashboard() {
+    WA.ui.modal.openModal({
+      title: 'adminDashboard',
+      src: `${WorkadventureService.getSolidarityWorldUrl()}/admin-dashboard`,
+      allowApi: true,
+      position: 'center',
+      allow: null,
+    });
+  }
+
+  static toggleDeveloperMode() {
+    const activatingDeveloperMode = !WA.player.state['developerMode'];
+    WA.player.state.saveVariable('developerMode', activatingDeveloperMode);
+    console.log(`Toggled developer mode: ${activatingDeveloperMode}`);
+  }
+
+  static currentUserIsAdmin(): boolean {
+    return WorkadventureService.isAdmin(WA.player.uuid!);
+  }
+
+  static isAdmin(uuid: string): boolean {
+    return ADMIN_UUIDS.indexOf(uuid) >= 0;
+  }
+
+  static async getAllDocumentLinksInMap() {
+    const map = await WA.room.getTiledMap();
+    return map.layers
+      .map(
+        (l) =>
+          (l as unknown as { objects: { properties?: MapProperty[] }[] })
+            .objects || [],
+      )
+      .flat()
+      .filter((i) => !!i.properties && i.properties.length > 0)
+      .map((i) => i.properties?.find((i) => i.name == 'openWebsite'))
+      .filter((i) => !!i);
   }
 }

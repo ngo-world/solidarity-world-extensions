@@ -9,7 +9,11 @@ import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/p
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
-import { WorkadventureService } from '../workadventure.service';
+import {
+  BroadcastEvents,
+  PlayerStateVariables,
+  WorkadventureService,
+} from '../workadventure.service';
 
 export interface Contact {
   contactName: string;
@@ -47,12 +51,11 @@ export class SmartphoneComponent implements OnInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   api: any;
   showSmartphone = false;
-  callingTargetPlayer?: RemotePlayerInterface;
   callRequest?: CallRequest;
   phoneNumberToAdd = '';
   contactToAdd = '';
   contacts: Contact[] = [];
-  currentUserPhoneNumber = '';
+  currentUserPhoneNumbers: Contact[] = [];
   phoneEnabled = false;
 
   constructor(private workadventureService: WorkadventureService) {}
@@ -62,71 +65,124 @@ export class SmartphoneComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    await this.workadventureService.init();
     console.info('Initializing smartphone screen');
+    await this.workadventureService.init();
     this.player = this.workadventureService.player!;
-    this.currentUserPhoneNumber = (
-      this.player.state.loadVariable('phoneNumbers') as Contact[]
-    )[0].phoneNumber;
-    this.showSmartphone = WA.player.state['smartphoneShown'] as boolean;
-    this.contacts = this.getContacts();
+    this.currentUserPhoneNumbers = this.player.state.loadVariable(
+      PlayerStateVariables.PHONE_NUMBERS,
+    ) as Contact[];
 
+    // contacts
+    this.contacts = this.getContacts();
     this.workadventureService.playersSubject.subscribe((players) => {
       this.players = players;
       this.contacts = this.getContacts();
     });
 
-    this.phoneEnabled = !this.player?.state['phoneDisabled'] as boolean;
-    this.player.state.onVariableChange('phoneDisabled').subscribe(() => {
-      this.phoneEnabled = !this.player?.state['phoneDisabled'] as boolean;
-    });
+    // phoneDisabled
+    this.phoneEnabled = !this.player?.state[
+      PlayerStateVariables.PHONE_DISABLED
+    ] as boolean;
+    this.player.state
+      .onVariableChange(PlayerStateVariables.PHONE_DISABLED)
+      .subscribe(() => {
+        const isEnabled = !this.player?.state[
+          PlayerStateVariables.PHONE_DISABLED
+        ] as boolean;
+        if (isEnabled != this.phoneEnabled) {
+          this.showSmartphone = true;
+        }
+        this.phoneEnabled = isEnabled;
+      });
+
+    // smartphoneShown
+    this.showSmartphone = WA.player.state[
+      PlayerStateVariables.SMARTPHONE_SHOWN
+    ] as boolean;
+    WA.player.state
+      .onVariableChange(PlayerStateVariables.SMARTPHONE_SHOWN)
+      .subscribe(() => {
+        console.info('Toggling phone');
+        this.showSmartphone = WA.player.state[
+          PlayerStateVariables.SMARTPHONE_SHOWN
+        ] as boolean;
+      });
 
     this.workadventureService.eventsSubject.subscribe((event) => {
       switch (event.name) {
-        case 'requestedCall':
-          if (!this.phoneEnabled) {
-            console.error('Got call but phone is disabled');
-            return;
-          }
-          console.log('User requests call', event);
-          this.onCallRequested(event.data as CallRequest, event.senderId!);
-          this.showSmartphone = true;
-          WA.player.state['smartphoneShown'] = true;
+        case BroadcastEvents.REQUEST_CALL:
+          this.onEventRequestedCall(event.data as CallRequest);
           break;
-        case 'declinedCall':
-          console.log('User declined call');
-          this.stopCall();
+        case BroadcastEvents.CALL_DECLINED:
+          this.onEventCallDeclined(event.data as CallRequest);
           break;
         default:
           console.error('Received unknown event. Ignoring', event);
           break;
       }
     });
-
-    WA.player.state.onVariableChange('smartphoneShown').subscribe(() => {
-      console.info('Toggling phone');
-      this.showSmartphone = WA.player.state['smartphoneShown'] as boolean;
-    });
   }
 
-  async onCallRequested(callRequest: CallRequest, requestedUserId: number) {
-    console.info('Call requested', callRequest.roomName, requestedUserId);
-    this.ringingSound.play({ loop: true });
-    const user = Array.from(WA.players.list()).find(
-      (x) => x.playerId == requestedUserId,
-    )!;
-    console.log('Requesting user', user);
-    this.callingTargetPlayer = user;
+  onEventCallDeclined(callRequest: CallRequest) {
+    if (!this.callRequest) {
+      return;
+    }
+
+    if (
+      !this.currentUserPhoneNumbers.find(
+        (c) => c.phoneNumber == callRequest.toPhoneNumber,
+      ) &&
+      !this.currentUserPhoneNumbers.find(
+        (c) => c.phoneNumber == callRequest.fromPhoneNumber,
+      )
+    ) {
+      console.warn('Ignoring call request because the number does not match');
+      return;
+    }
+    console.log(`User declined call`);
+    this.stopCall('Other user declined call');
+  }
+
+  onEventRequestedCall(callRequest: CallRequest) {
+    if (
+      !this.currentUserPhoneNumbers.find(
+        (c) => c.phoneNumber == callRequest.toPhoneNumber,
+      )
+    ) {
+      console.warn('Ignoring call request because the number does not match');
+      return;
+    }
+
+    console.log('User requests call', callRequest);
+    this.onCallRequested(callRequest);
+    this.showSmartphone = true;
+    WA.player.state[PlayerStateVariables.SMARTPHONE_SHOWN] = true;
+  }
+
+  async onCallRequested(callRequest: CallRequest) {
+    console.info('Call requested', callRequest.roomName);
     this.callRequest = callRequest;
+
+    if (this.phoneEnabled) {
+      this.ringingSound.play({ loop: true });
+    } else {
+      this.stopCall('Phone is disabled');
+      console.warn('Stopping call because phone is disabled');
+    }
   }
 
   async joinCall(callRequest: CallRequest, playRingingSound: boolean) {
     console.info('Joining call', callRequest, playRingingSound);
+    this.callRequest = callRequest;
 
-    await this.player!.state.saveVariable('calling', callRequest, {
-      public: true,
-      persist: false,
-    });
+    await this.player!.state.saveVariable(
+      PlayerStateVariables.CALLING,
+      callRequest,
+      {
+        public: true,
+        persist: false,
+      },
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.api = new (window as any).JitsiMeetExternalAPI(
       jitsiDomain,
@@ -141,56 +197,37 @@ export class SmartphoneComponent implements OnInit {
     });
     this.api.addListener('participantLeft', () => {
       // WA.sound.loadSound(`https://${jitsiDomain}/sounds/left.mp3`).play(undefined);
-      this.stopCall();
+      this.stopCall('Call is over');
     });
   }
 
   requestCall(contact: Contact) {
-    console.log(this.players.map((i) => i.state['phoneNumbers']));
-    const player = this.players.find(
-      (x) =>
-        !!((x.state['phoneNumbers'] as Contact[]) || []).find(
-          (i) => i.phoneNumber == contact.phoneNumber,
-        ),
-    );
-    if (!player) {
-      console.error(
-        'Cannot call user with invalid phone number:',
-        contact,
-        this.players,
-      );
-      return;
-    }
-    this.callingTargetPlayer = player;
-
+    const contactToCallFrom = this.currentUserPhoneNumbers[0];
     const callRequest: CallRequest = {
-      fromPlayerName: WA.player.name,
-      fromPhoneNumber: this.currentUserPhoneNumber,
-      toPlayerName: player.name,
+      fromPlayerName: contactToCallFrom.contactName || WA.player.name,
+      fromPhoneNumber: contactToCallFrom.phoneNumber,
+      toPlayerName: contact.contactName,
       toPhoneNumber: contact.phoneNumber,
-      roomName: getRoomName(WA.player.playerId, player.playerId),
+      roomName: getRoomName(contactToCallFrom.phoneNumber, contact.phoneNumber),
     };
     this.callRequest = callRequest;
     this.joinCall(callRequest, true);
-    WorkadventureService.requestCall(player, callRequest);
+    WorkadventureService.requestCall(callRequest);
   }
 
-  async stopCall() {
-    console.log('Stopping call');
+  async stopCall(reason: string) {
+    console.log(`Stopping call because of: ${reason}`);
+    this.ringingSound.stop();
+    this.api?.dispose();
+    this.api = null;
 
-    await this.player!.state.saveVariable('calling', null, {
+    await this.player!.state.saveVariable(PlayerStateVariables.CALLING, null, {
       public: true,
       persist: false,
     });
 
-    this.callingTargetPlayer?.sendEvent('declinedCall', '');
-    this.callingTargetPlayer = undefined;
-
+    WA.event.broadcast(BroadcastEvents.CALL_DECLINED, this.callRequest);
     this.callRequest = undefined;
-
-    this.ringingSound.stop();
-    this.api?.dispose();
-    this.api = null;
   }
 
   acceptCall() {

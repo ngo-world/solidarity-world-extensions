@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CardModule } from 'primeng/card';
-import { WorkadventureService } from '../workadventure.service';
+import {
+  BroadcastEvents,
+  WorkadventureService,
+} from '../workadventure.service';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { RemotePlayerInterface } from '@workadventure/iframe-api-typings';
 import { ButtonModule } from 'primeng/button';
@@ -15,12 +18,6 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { CallRequest, Contact } from '../smartphone/smartphone.component';
 import { InputTextModule } from 'primeng/inputtext';
 import { PlayerSelectorComponent } from '../player-selector/player-selector.component';
-
-interface MapProperty {
-  name: string;
-  value: string;
-  type: string;
-}
 
 interface MapObject {
   name: string;
@@ -59,7 +56,6 @@ export class AdminDashboardComponent implements OnInit {
   player?: WorkadventurePlayerCommands;
   players: RemotePlayerInterface[] = [];
   api: unknown;
-  objectsWithOpenWebsiteProperty: MapProperty[] = [];
   objects: MapObject[] = [];
   countdownMinutes = 10;
   countdownSeconds = 0;
@@ -77,17 +73,17 @@ export class AdminDashboardComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     document.querySelector('html')?.classList.toggle('dark-mode');
-
     await this.workadventureService.init();
+
+    setInterval(() => {
+      console.log('Player by id', WA.players.get(13));
+    }, 1000);
 
     this.player = this.workadventureService.player!;
     this.workadventureService.playersSubject.subscribe((players) => {
       this.players = players;
       this.calls = this.getCalls(players);
     });
-
-    this.objectsWithOpenWebsiteProperty = await this.getAllDocumentLinksInMap();
-    console.log(this.objectsWithOpenWebsiteProperty);
 
     this.developerMode =
       (WA.player.state.loadVariable('developerMode') as boolean) || false;
@@ -109,20 +105,6 @@ export class AdminDashboardComponent implements OnInit {
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async getAllDocumentLinksInMap() {
-    const map = await WA.room.getTiledMap();
-    return map.layers
-      .map(
-        (l) =>
-          (l as unknown as { objects: { properties?: MapProperty[] }[] })
-            .objects || [],
-      )
-      .flat()
-      .filter((i) => !!i.properties && i.properties.length > 0)
-      .map((i) => i.properties?.find((i) => i.name == 'openWebsite'))
-      .filter((i) => !!i);
-  }
-
   getCalls(players: RemotePlayerInterface[]): CallRequest[] {
     return players
       .filter((i) => !!i.state['calling'])
@@ -131,7 +113,7 @@ export class AdminDashboardComponent implements OnInit {
 
   playSoundForSelectedPlayers(soundUrl: string): void {
     Array.from(this.selectedPlayersToPlaySound).forEach((p) =>
-      p.sendEvent('playSound', soundUrl),
+      p.sendEvent(BroadcastEvents.PLAY_SOUND, soundUrl),
     );
   }
 
@@ -154,7 +136,7 @@ export class AdminDashboardComponent implements OnInit {
       toPlayerName: targetPlayer.name,
       roomName: 'admin_to_player_',
     };
-    WorkadventureService.requestCall(targetPlayer, callRequest);
+    WorkadventureService.requestCall(callRequest);
     window.open(`https://${jitsiDomain}/${callRequest.roomName}`);
   }
 
@@ -165,7 +147,6 @@ export class AdminDashboardComponent implements OnInit {
   teleportToObject(object: MapObject) {
     const middleX = object.x + (object.width ?? 0) / 2;
     const middleY = object.y + (object.height ?? 0) / 2;
-    console.log(object, middleX, middleY);
     WA.player.teleport(middleX, middleY);
   }
 
@@ -190,13 +171,20 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   async toggleDeveloperMode() {
-    await WA.player.state.saveVariable('developerMode', !this.developerMode);
+    const newDeveloperMode = !this.developerMode;
+    await WA.player.state.saveVariable('developerMode', newDeveloperMode);
+    this.players.forEach((p) =>
+      this.setVariableOnRemotePlayer(p, {
+        variableName: 'developerMode',
+        variableValue: newDeveloperMode,
+      }),
+    );
   }
 
   startBroadcast() {
     console.log('Starting broadcast');
     const roomName = 'broadcast';
-    WA.event.broadcast('joinBroadcast', roomName);
+    WA.event.broadcast(BroadcastEvents.JOIN_BROADCAST, roomName);
     window.open(`https://${jitsiDomain}/${roomName}`);
   }
   listenToCall(callRequest: CallRequest) {
@@ -244,6 +232,7 @@ export class AdminDashboardComponent implements OnInit {
     const documentLink = player.state['document'] as string;
     window.open(documentLink);
   }
+
   setPlayerDocument($event: Event, player: RemotePlayerInterface) {
     this.setVariableOnRemotePlayer(player, {
       variableName: 'document',
