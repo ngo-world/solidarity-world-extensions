@@ -5,7 +5,10 @@ import {
   WorkadventureService,
   WorldTime,
 } from '../workadventure.service';
-import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
+import {
+  Position,
+  WorkadventurePlayerCommands,
+} from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { CommonModule } from '@angular/common';
 import { isBefore } from 'date-fns';
 import { SetVariableEvent } from '../admin-dashboard/admin-dashboard.component';
@@ -19,6 +22,7 @@ export interface UserInfo {
   phoneNumbers: Contact[];
   phoneDisabled: boolean;
   currentCall: CallRequest;
+  position: Position;
 }
 
 @Component({
@@ -62,22 +66,9 @@ export class BackgroundComponent implements OnInit {
         case BroadcastEvents.PLAY_SOUND:
           this.playSound(event.data! as string);
           break;
-        case BroadcastEvents.SET_VARIABLE: {
-          const setVariableEvent = event.data as unknown as SetVariableEvent;
-          if (this.player!.uuid !== setVariableEvent.playerUUID) {
-            return;
-          }
-          this.player?.state.saveVariable(
-            setVariableEvent.variableName,
-            setVariableEvent.variableValue,
-            {
-              persist: true,
-              public: true,
-              scope: 'world',
-            },
-          );
+        case BroadcastEvents.SET_VARIABLE:
+          this.onEventSetVariable(event.data as SetVariableEvent);
           break;
-        }
         case BroadcastEvents.JOIN_BROADCAST: {
           const roomname = event.data! as string;
           this.joinBroadcast(roomname);
@@ -112,7 +103,22 @@ export class BackgroundComponent implements OnInit {
       });
   }
 
-  onEventShareUserInfo(requestId: number) {
+  onEventSetVariable(setVariableEvent: SetVariableEvent) {
+    if (this.player!.uuid !== setVariableEvent.playerUUID) {
+      return;
+    }
+    this.player?.state.saveVariable(
+      setVariableEvent.variableName,
+      setVariableEvent.variableValue,
+      {
+        persist: true,
+        public: true,
+        scope: 'world',
+      },
+    );
+  }
+
+  async onEventShareUserInfo(requestId: number) {
     const phoneNumbers = this.player?.state.loadVariable(
       PlayerStateVariables.PHONE_NUMBERS,
     ) as Contact[];
@@ -130,6 +136,7 @@ export class BackgroundComponent implements OnInit {
       currentCall: this.player!.state[
         PlayerStateVariables.CALLING
       ] as CallRequest,
+      position: await this.player!.getPosition(),
     };
     WA.event.broadcast(BroadcastEvents.SHARE_USER_INFO_RESPONSE, userInfo);
   }

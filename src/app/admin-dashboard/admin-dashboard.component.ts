@@ -133,7 +133,7 @@ export class AdminDashboardComponent implements OnInit {
     //this.api = new (window as any).JitsiMeetExternalAPI(jitsiDomain, getJitsiConfig(roomName, 500, 500));
   }
 
-  teleportToPlayer(targetPlayer: RemotePlayerInterface) {
+  teleportToPlayer(targetPlayer: UserInfo) {
     const position = targetPlayer.position;
     WA.player.teleport(position.x, position.y);
   }

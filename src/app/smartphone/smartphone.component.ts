@@ -169,10 +169,6 @@ export class SmartphoneComponent implements OnInit {
     await this.player!.state.saveVariable(
       PlayerStateVariables.CALLING,
       callRequest,
-      {
-        public: true,
-        persist: false,
-      },
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.api = new (window as any).JitsiMeetExternalAPI(
@@ -212,10 +208,7 @@ export class SmartphoneComponent implements OnInit {
     this.api?.dispose();
     this.api = null;
 
-    await this.player!.state.saveVariable(PlayerStateVariables.CALLING, null, {
-      public: true,
-      persist: false,
-    });
+    await this.player!.state.saveVariable(PlayerStateVariables.CALLING, null);
 
     WA.event.broadcast(BroadcastEvents.CALL_DECLINED, this.callRequest);
     this.callRequest = undefined;
