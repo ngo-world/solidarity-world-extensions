@@ -1,9 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import {
-  RemotePlayerInterface,
-  Sound,
-} from '@workadventure/iframe-api-typings';
+import { Sound } from '@workadventure/iframe-api-typings';
 import { getJitsiConfig, getRoomName, jitsiDomain } from './jitsi-options';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { ButtonModule } from 'primeng/button';
@@ -40,7 +37,6 @@ export class SmartphoneComponent implements OnInit {
     `https://${jitsiDomain}/sounds/outgoingRinging.mp3`,
   );
   player?: WorkadventurePlayerCommands;
-  players: RemotePlayerInterface[] = [];
   /**
    * See https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-iframe
    *
@@ -74,10 +70,6 @@ export class SmartphoneComponent implements OnInit {
 
     // contacts
     this.contacts = this.getContacts();
-    this.workadventureService.playersSubject.subscribe((players) => {
-      this.players = players;
-      this.contacts = this.getContacts();
-    });
 
     // phoneDisabled
     this.phoneEnabled = !this.player?.state[
@@ -117,7 +109,6 @@ export class SmartphoneComponent implements OnInit {
           this.onEventCallDeclined(event.data as CallRequest);
           break;
         default:
-          console.error('Received unknown event. Ignoring', event);
           break;
       }
     });

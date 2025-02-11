@@ -7,6 +7,7 @@ import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/p
 import { formatISO, parseISO } from 'date-fns';
 import { Subject } from 'rxjs';
 import { CallRequest } from './smartphone/smartphone.component';
+import { UserInfo } from './background/background.component';
 
 const ADMIN_UUIDS: string[] = ['info@davidgengenbach.de'];
 
@@ -26,6 +27,8 @@ export enum PlayerStateVariables {
   PHONE_DISABLED = 'phoneDisabled',
   SMARTPHONE_SHOWN = 'smartphoneShown',
   CALLING = 'calling',
+  DOCUMENT_LINK = 'documentLink',
+  DEVELOPER_MODE = 'developerMode',
 }
 
 export enum BroadcastEvents {
@@ -34,7 +37,8 @@ export enum BroadcastEvents {
   PLAY_SOUND = 'playSound',
   JOIN_BROADCAST = 'joinBroadcast',
   SET_VARIABLE = 'setVariable',
-  SHARE_PHONE_NUMBER = 'sharePhoneNumber',
+  SHARE_USER_INFO = 'shareUserInfo',
+  SHARE_USER_INFO_RESPONSE = 'shareUserInfoResponse',
 }
 
 @Injectable({
@@ -64,7 +68,6 @@ export class WorkadventureService {
 
     Object.values(BroadcastEvents).forEach((eventName) =>
       WA.event.on(eventName).subscribe((e) => {
-        console.log(`Received event.`, e);
         this.eventsSubject.next(e);
       }),
     );
@@ -224,5 +227,29 @@ export class WorkadventureService {
       .filter((i) => !!i.properties && i.properties.length > 0)
       .map((i) => i.properties?.find((i) => i.name == 'openWebsite'))
       .filter((i) => !!i);
+  }
+
+  async getPlayerInfos(): Promise<UserInfo[]> {
+    const requestId = Math.random();
+    const userInfos: UserInfo[] = [];
+    const subscription = this.eventsSubject.subscribe((event) => {
+      if (event.name !== BroadcastEvents.SHARE_USER_INFO_RESPONSE) {
+        return;
+      }
+      const userInfo = event.data as UserInfo;
+      if (userInfo.requestId === requestId) {
+        userInfos.push(userInfo);
+      }
+    });
+
+    WA.event.broadcast(BroadcastEvents.SHARE_USER_INFO, requestId);
+
+    return new Promise((resolveInner) => {
+      setTimeout(() => {
+        subscription.unsubscribe();
+        userInfos.sort((a, b) => a.playerName.localeCompare(b.playerName));
+        resolveInner(userInfos);
+      }, 1000);
+    });
   }
 }

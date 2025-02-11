@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import {
   BroadcastEvents,
+  PlayerStateVariables,
   WorkadventureService,
 } from '../workadventure.service';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
@@ -18,6 +19,7 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { CallRequest, Contact } from '../smartphone/smartphone.component';
 import { InputTextModule } from 'primeng/inputtext';
 import { PlayerSelectorComponent } from '../player-selector/player-selector.component';
+import { UserInfo } from '../background/background.component';
 
 interface MapObject {
   name: string;
@@ -28,6 +30,7 @@ interface MapObject {
 }
 
 export interface SetVariableEvent {
+  playerUUID: string;
   variableName: string;
   variableValue: unknown;
 }
@@ -68,35 +71,35 @@ export class AdminDashboardComponent implements OnInit {
   displayNameForNewPhoneNumber = '';
   phoneNumberForNewPhoneNumber = '';
   playerDocuments: Record<number, string> = {};
+  userInfos: UserInfo[] = [];
 
   constructor(private workadventureService: WorkadventureService) {}
 
   async ngOnInit(): Promise<void> {
     document.querySelector('html')?.classList.toggle('dark-mode');
     await this.workadventureService.init();
-
-    setInterval(() => {
-      console.log('Player by id', WA.players.get(13));
-    }, 1000);
-
     this.player = this.workadventureService.player!;
-    this.workadventureService.playersSubject.subscribe((players) => {
-      this.players = players;
-      this.calls = this.getCalls(players);
-    });
 
+    // userInfos and calls
+    this.getUserInfosAndCalls();
+    setInterval(async () => {
+      this.getUserInfosAndCalls();
+    }, 5000);
+
+    // developerMode
     this.developerMode =
       (WA.player.state.loadVariable('developerMode') as boolean) || false;
     WA.player.state.onVariableChange('developerMode').subscribe((value) => {
       this.developerMode = value as boolean;
     });
 
+    // adminPhoneNumbers
     this.adminPhoneNumbers = this.player.state['phoneNumbers'] as Contact[];
-
     this.player.state.onVariableChange('phoneNumbers').subscribe((value) => {
       this.adminPhoneNumbers = value as Contact[];
     });
 
+    // areas
     const map = await WA.room.getTiledMap();
     this.objects = map.layers
       .filter((i) => i.type == 'objectgroup')
@@ -105,14 +108,21 @@ export class AdminDashboardComponent implements OnInit {
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  getCalls(players: RemotePlayerInterface[]): CallRequest[] {
-    return players
-      .filter((i) => !!i.state['calling'])
-      .map((i) => i.state['calling'] as CallRequest);
+  async getUserInfosAndCalls() {
+    this.userInfos = await this.workadventureService.getPlayerInfos();
+    this.calls = this.getCalls();
+  }
+
+  getCalls(): CallRequest[] {
+    return this.userInfos
+      .filter((i) => !!i.currentCall)
+      .map((i) => i.currentCall);
   }
 
   playSoundForSelectedPlayers(soundUrl: string): void {
+    throw new Error('Not implemented');
     Array.from(this.selectedPlayersToPlaySound).forEach((p) =>
+      // ToDo
       p.sendEvent(BroadcastEvents.PLAY_SOUND, soundUrl),
     );
   }
@@ -128,12 +138,12 @@ export class AdminDashboardComponent implements OnInit {
     WA.player.teleport(position.x, position.y);
   }
 
-  call(targetPlayer: RemotePlayerInterface) {
+  call(targetPlayer: UserInfo) {
     const callRequest: CallRequest = {
       fromPhoneNumber: '+111111111',
       fromPlayerName: 'Admin',
-      toPhoneNumber: targetPlayer.state['phoneNumber'] as string,
-      toPlayerName: targetPlayer.name,
+      toPhoneNumber: targetPlayer.phoneNumbers[0].phoneNumber,
+      toPlayerName: targetPlayer.playerName,
       roomName: 'admin_to_player_',
     };
     WorkadventureService.requestCall(callRequest);
@@ -172,10 +182,14 @@ export class AdminDashboardComponent implements OnInit {
 
   async toggleDeveloperMode() {
     const newDeveloperMode = !this.developerMode;
-    await WA.player.state.saveVariable('developerMode', newDeveloperMode);
-    this.players.forEach((p) =>
-      this.setVariableOnRemotePlayer(p, {
-        variableName: 'developerMode',
+    await WA.player.state.saveVariable(
+      PlayerStateVariables.DEVELOPER_MODE,
+      newDeveloperMode,
+    );
+    this.userInfos.forEach((p) =>
+      this.setVariableOnRemotePlayer({
+        playerUUID: p.playerUUID,
+        variableName: PlayerStateVariables.DEVELOPER_MODE,
         variableValue: newDeveloperMode,
       }),
     );
@@ -187,11 +201,13 @@ export class AdminDashboardComponent implements OnInit {
     WA.event.broadcast(BroadcastEvents.JOIN_BROADCAST, roomName);
     window.open(`https://${jitsiDomain}/${roomName}`);
   }
+
   listenToCall(callRequest: CallRequest) {
     window.open(`https://${jitsiDomain}/${callRequest.roomName}`);
   }
-  getPhoneNumbers(player: RemotePlayerInterface): string {
-    return (player.state['phoneNumbers'] as Contact[])
+
+  getPhoneNumbers(player: UserInfo): string {
+    return player.phoneNumbers
       .map((i) => `${i.contactName || '(no alias)'}: ${i.phoneNumber}`)
       .join('\n');
   }
@@ -219,39 +235,44 @@ export class AdminDashboardComponent implements OnInit {
     if (!contact.contactName || contact.contactName == '') return;
     if (!contact.phoneNumber || contact.phoneNumber == '') return;
 
-    const currentNumbers = this.player!.state['phoneNumbers'] as Contact[];
+    const currentNumbers = this.player!.state[
+      PlayerStateVariables.PHONE_NUMBERS
+    ] as Contact[];
     currentNumbers.push(contact);
-    this.player!.state.saveVariable('phoneNumbers', currentNumbers, {
-      public: true,
-      persist: true,
-      scope: 'world',
-    });
+    this.player!.state.saveVariable(
+      PlayerStateVariables.PHONE_NUMBERS,
+      currentNumbers,
+      {
+        public: true,
+        persist: true,
+        scope: 'world',
+      },
+    );
   }
 
-  openDocument(player: RemotePlayerInterface) {
-    const documentLink = player.state['document'] as string;
-    window.open(documentLink);
+  openDocument(userInfo: UserInfo) {
+    window.open(userInfo.documentLink);
   }
 
-  setPlayerDocument($event: Event, player: RemotePlayerInterface) {
-    this.setVariableOnRemotePlayer(player, {
-      variableName: 'document',
+  setPlayerDocument($event: Event, player: UserInfo) {
+    this.setVariableOnRemotePlayer({
+      playerUUID: player.playerUUID,
+      variableName: PlayerStateVariables.DOCUMENT_LINK,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       variableValue: ($event.target as any).value,
     } as SetVariableEvent);
   }
 
-  setVariableOnRemotePlayer(
-    player: RemotePlayerInterface,
-    event: SetVariableEvent,
-  ) {
-    player.sendEvent('setVariable', event);
+  setVariableOnRemotePlayer(event: SetVariableEvent) {
+    WA.event.broadcast(BroadcastEvents.SET_VARIABLE, event);
+    this.getUserInfosAndCalls();
   }
 
-  togglePhone(player: RemotePlayerInterface) {
-    this.setVariableOnRemotePlayer(player, {
-      variableName: 'phoneDisabled',
-      variableValue: !player.state['phoneDisabled'],
+  togglePhone(userInfo: UserInfo) {
+    this.setVariableOnRemotePlayer({
+      playerUUID: userInfo.playerUUID,
+      variableName: PlayerStateVariables.PHONE_DISABLED,
+      variableValue: !userInfo.phoneDisabled,
     } as SetVariableEvent);
   }
 }

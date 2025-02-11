@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {
   BroadcastEvents,
+  PlayerStateVariables,
   WorkadventureService,
   WorldTime,
 } from '../workadventure.service';
@@ -8,6 +9,17 @@ import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/p
 import { CommonModule } from '@angular/common';
 import { isBefore } from 'date-fns';
 import { SetVariableEvent } from '../admin-dashboard/admin-dashboard.component';
+import { CallRequest, Contact } from '../smartphone/smartphone.component';
+
+export interface UserInfo {
+  requestId: number;
+  playerUUID: string;
+  playerName: string;
+  documentLink: string | undefined;
+  phoneNumbers: Contact[];
+  phoneDisabled: boolean;
+  currentCall: CallRequest;
+}
 
 @Component({
   selector: 'app-background',
@@ -46,13 +58,15 @@ export class BackgroundComponent implements OnInit {
     });
 
     this.workadventureService.eventsSubject.subscribe((event) => {
-      console.log('Received event in background: ', event);
       switch (event.name) {
         case BroadcastEvents.PLAY_SOUND:
           this.playSound(event.data! as string);
           break;
         case BroadcastEvents.SET_VARIABLE: {
           const setVariableEvent = event.data as unknown as SetVariableEvent;
+          if (this.player!.uuid !== setVariableEvent.playerUUID) {
+            return;
+          }
           this.player?.state.saveVariable(
             setVariableEvent.variableName,
             setVariableEvent.variableValue,
@@ -69,8 +83,10 @@ export class BackgroundComponent implements OnInit {
           this.joinBroadcast(roomname);
           break;
         }
+        case BroadcastEvents.SHARE_USER_INFO:
+          this.onEventShareUserInfo(event.data as number);
+          break;
         default:
-          console.error('Received unknown event. Ignoring', event);
           break;
       }
     });
@@ -94,6 +110,28 @@ export class BackgroundComponent implements OnInit {
         // Important: do NOT use the value directy
         this.worldtime = this.workadventureService.getVirtualWorldTime();
       });
+  }
+
+  onEventShareUserInfo(requestId: number) {
+    const phoneNumbers = this.player?.state.loadVariable(
+      PlayerStateVariables.PHONE_NUMBERS,
+    ) as Contact[];
+    const userInfo: UserInfo = {
+      requestId: requestId,
+      playerUUID: this.player!.uuid!,
+      playerName: this.player!.name,
+      documentLink: this.player!.state[PlayerStateVariables.DOCUMENT_LINK] as
+        | string
+        | undefined,
+      phoneNumbers,
+      phoneDisabled: this.player!.state[
+        PlayerStateVariables.PHONE_DISABLED
+      ] as boolean,
+      currentCall: this.player!.state[
+        PlayerStateVariables.CALLING
+      ] as CallRequest,
+    };
+    WA.event.broadcast(BroadcastEvents.SHARE_USER_INFO_RESPONSE, userInfo);
   }
 
   getCurrentCountdown(): string {

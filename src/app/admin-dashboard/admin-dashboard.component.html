@@ -1,50 +1,57 @@
 <div class="p-10 dark-mode grid grid-cols-1 gap-5">
   <p class="text-xl"><i class="pi pi-user"></i> Users</p>
-
-  <p-table [value]="players">
+  <p-table [value]="userInfos">
     <ng-template #header>
       <tr>
-        <th>ID</th>
+        <th>UUID</th>
+        <th>Name</th>
         <th>Phone numbers</th>
-        <th>Document link</th>
-        <th></th>
+        <th>Document</th>
+        <th>Actions</th>
       </tr>
     </ng-template>
-    <ng-template #body let-player>
+    <ng-template #body let-userInfo>
       <tr>
-        <td>{{ player.playerId }}</td>
-        <td>{{ player.name }}</td>
-        <td>{{ getPhoneNumbers(player) }}</td>
+        <td>{{ userInfo.playerUUID }}</td>
+        <td>{{ userInfo.playerName }}</td>
+        <td>
+          <p *ngFor="let contact of userInfo.phoneNumbers">
+            {{ contact.contactName || userInfo.playerName }}:
+            {{ contact.phoneNumber }}
+          </p>
+        </td>
         <td>
           <div class="flex flex-row gap-3">
-          <input
-            pInputText
-            [value]="player.state['document']"
-            (change)="setPlayerDocument($event, player)"
-          />
-          <p-button
-            icon="pi pi-link"
-            label="Open document"
-            (onClick)="openDocument(player)"
-          />
+            <input
+              pInputText
+              [value]="userInfo.documentLink"
+              (change)="setPlayerDocument($event, userInfo)"
+            />
+            <p-button
+              icon="pi pi-link"
+              label="Open document"
+              (onClick)="openDocument(userInfo)"
+            />
           </div>
         </td>
         <td>
           <div class="flex flex-row gap-3">
             <p-button
-              (onClick)="teleportToPlayer(player)"
+              (onClick)="teleportToPlayer(userInfo)"
               icon="pi pi-indian-rupee"
               label="Teleport"
             />
             <p-button
               icon="pi pi-phone"
               label="Call"
-              (onClick)="call(player)"
+              (onClick)="call(userInfo)"
             />
             <p-button
-              [label]="player.state['phoneDisabled'] ? 'Enable phone' : 'Disable phone'"
-              (onClick)="togglePhone(player)"
-              [severity]="player.state['phoneDisabled'] ? 'primary' : 'danger'"
+              [label]="
+                userInfo.phoneDisabled ? 'Enable phone' : 'Disable phone'
+              "
+              (onClick)="togglePhone(userInfo)"
+              [severity]="userInfo.phoneDisabled ? 'primary' : 'danger'"
             />
           </div>
         </td>
