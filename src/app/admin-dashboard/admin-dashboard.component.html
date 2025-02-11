@@ -241,19 +241,6 @@
   <p class="text-xl"><i class="pi pi-microphone"></i> Broadcasting</p>
   <p-button label="Start broadcast" (onClick)="startBroadcast()" />
 
-  <p class="text-xl">
-    <i class="pi pi-exclamation-triangle"></i> Developer options
-  </p>
-  <p-button
-    [label]="developerMode ? 'Disable developer mode' : 'Enable developer mode'"
-    (onClick)="toggleDeveloperMode()"
-    [severity]="developerMode ? 'primary' : 'danger'"
-  />
-
   <p class="text-xl"><i class="pi pi-cog"></i> Map config</p>
-  <pre>
-{{
-  getConfigAsJsonString()
-}}
-  </pre>
+  <pre>{{ getConfigAsJsonString() }}</pre>
 </div>

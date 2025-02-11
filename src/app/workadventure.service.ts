@@ -13,7 +13,7 @@ const ADMIN_UUIDS: string[] = ['info@davidgengenbach.de'];
 
 export interface MapConfig {
   solidarityWorldExtensionsUrl: string;
-  jitsiUrl: string;
+  jitsiDomain: string;
 }
 
 export interface WorldTime {
@@ -33,7 +33,6 @@ export enum PlayerStateVariables {
   SMARTPHONE_SHOWN = 'smartphoneShown',
   CALLING = 'calling',
   DOCUMENT_LINK = 'documentLink',
-  DEVELOPER_MODE = 'developerMode',
 }
 
 export enum BroadcastEvents {
@@ -201,12 +200,6 @@ export class WorkadventureService {
       position: 'center',
       allow: null,
     });
-  }
-
-  static toggleDeveloperMode() {
-    const activatingDeveloperMode = !WA.player.state['developerMode'];
-    WA.player.state.saveVariable('developerMode', activatingDeveloperMode);
-    console.log(`Toggled developer mode: ${activatingDeveloperMode}`);
   }
 
   static currentUserIsAdmin(): boolean {

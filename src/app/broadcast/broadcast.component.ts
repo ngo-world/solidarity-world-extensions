@@ -21,7 +21,7 @@ export class BroadcastComponent implements OnInit {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.api = new (window as any).JitsiMeetExternalAPI(
-      WorkadventureService.getRoomConfig().jitsiUrl,
+      WorkadventureService.getRoomConfig().jitsiDomain,
       getJitsiConfig(roomName, true),
     );
   }

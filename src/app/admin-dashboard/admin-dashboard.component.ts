@@ -74,7 +74,6 @@ export class AdminDashboardComponent implements OnInit {
   worldTimeHours = 12;
   worldTimeMinutes = 0;
   timeAsString = '11-00';
-  developerMode = false;
   calls: CallRequest[] = [];
   adminPhoneNumbers: Contact[] = [];
   displayNameForNewPhoneNumber = '';
@@ -94,18 +93,6 @@ export class AdminDashboardComponent implements OnInit {
 
     // userInfos and calls
     this.getUserInfosAndCalls();
-    /*
-    setInterval(async () => {
-      this.getUserInfosAndCalls();
-    }, 3000);
-    */
-
-    // developerMode
-    this.developerMode =
-      (WA.player.state.loadVariable('developerMode') as boolean) || false;
-    WA.player.state.onVariableChange('developerMode').subscribe((value) => {
-      this.developerMode = value as boolean;
-    });
 
     // adminPhoneNumbers
     this.adminPhoneNumbers = this.player.state['phoneNumbers'] as Contact[];
@@ -143,7 +130,7 @@ export class AdminDashboardComponent implements OnInit {
 
   joinCall(targetPlayer: CallRequest): void {
     window.open(
-      `https://${WorkadventureService.getRoomConfig().jitsiUrl}/${targetPlayer.roomName}`,
+      `https://${WorkadventureService.getRoomConfig().jitsiDomain}/${targetPlayer.roomName}`,
     );
   }
 
@@ -169,7 +156,7 @@ export class AdminDashboardComponent implements OnInit {
     };
     WorkadventureService.requestCall(callRequest);
     window.open(
-      `https://${WorkadventureService.getRoomConfig().jitsiUrl}/${callRequest.roomName}`,
+      `https://${WorkadventureService.getRoomConfig().jitsiDomain}/${callRequest.roomName}`,
     );
   }
 
@@ -220,33 +207,18 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  async toggleDeveloperMode() {
-    const newDeveloperMode = !this.developerMode;
-    await WA.player.state.saveVariable(
-      PlayerStateVariables.DEVELOPER_MODE,
-      newDeveloperMode,
-    );
-    this.userInfos.forEach((p) =>
-      this.setVariableOnRemotePlayer({
-        playerUUID: p.playerUUID,
-        variableName: PlayerStateVariables.DEVELOPER_MODE,
-        variableValue: newDeveloperMode,
-      }),
-    );
-  }
-
   startBroadcast() {
     console.log('Starting broadcast');
     const roomName = 'broadcast';
     WA.event.broadcast(BroadcastEvents.JOIN_BROADCAST, roomName);
     window.open(
-      `https://${WorkadventureService.getRoomConfig().jitsiUrl}/${roomName}`,
+      `https://${WorkadventureService.getRoomConfig().jitsiDomain}/${roomName}`,
     );
   }
 
   listenToCall(callRequest: CallRequest) {
     window.open(
-      `https://${WorkadventureService.getRoomConfig().jitsiUrl}/${callRequest.roomName}`,
+      `https://${WorkadventureService.getRoomConfig().jitsiDomain}/${callRequest.roomName}`,
     );
   }
 

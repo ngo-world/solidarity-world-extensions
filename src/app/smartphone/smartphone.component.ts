@@ -34,7 +34,7 @@ export interface CallRequest {
 })
 export class SmartphoneComponent implements OnInit {
   ringingSound: Sound = WA.sound.loadSound(
-    `https://${WorkadventureService.getRoomConfig().jitsiUrl}/sounds/outgoingRinging.mp3`,
+    `https://${WorkadventureService.getRoomConfig().jitsiDomain}/sounds/outgoingRinging.mp3`,
   );
   player?: WorkadventurePlayerCommands;
   /**
@@ -178,7 +178,7 @@ export class SmartphoneComponent implements OnInit {
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.api = new (window as any).JitsiMeetExternalAPI(
-      WorkadventureService.getRoomConfig().jitsiUrl,
+      WorkadventureService.getRoomConfig().jitsiDomain,
       getJitsiConfig(callRequest.roomName, false, 0, 0),
     );
 
@@ -189,7 +189,7 @@ export class SmartphoneComponent implements OnInit {
       this.ringingSound.stop();
     });
     this.api.addListener('participantLeft', () => {
-      // WA.sound.loadSound(`https://${WorkadventureService.getRoomConfig().jitsiUrl}/sounds/left.mp3`).play(undefined);
+      // WA.sound.loadSound(`${WorkadventureService.getRoomConfig().jitsiUrl}/sounds/left.mp3`).play(undefined);
       this.stopCall('Call is over');
     });
   }
