@@ -14,12 +14,14 @@ import { jitsiDomain } from '../smartphone/jitsi-options';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
 import { add } from 'date-fns';
+import { PopoverModule } from 'primeng/popover';
 
 import { InputMaskModule } from 'primeng/inputmask';
 import { CallRequest, Contact } from '../smartphone/smartphone.component';
 import { InputTextModule } from 'primeng/inputtext';
 import { PlayerSelectorComponent } from '../player-selector/player-selector.component';
 import { UserInfo } from '../background/background.component';
+import { SelectModule } from 'primeng/select';
 
 interface MapObject {
   name: string;
@@ -35,6 +37,12 @@ export interface SetVariableEvent {
   variableValue: unknown;
 }
 
+export interface TeleportEvent {
+  playerUUID: string;
+  x: number;
+  y: number;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -48,6 +56,8 @@ export interface SetVariableEvent {
     FormsModule,
     InputMaskModule,
     PlayerSelectorComponent,
+    PopoverModule,
+    SelectModule,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
@@ -72,6 +82,7 @@ export class AdminDashboardComponent implements OnInit {
   phoneNumberForNewPhoneNumber = '';
   playerDocuments: Record<number, string> = {};
   userInfos: UserInfo[] = [];
+  selectedObject?: MapObject;
 
   constructor(private workadventureService: WorkadventureService) {}
 
@@ -82,9 +93,11 @@ export class AdminDashboardComponent implements OnInit {
 
     // userInfos and calls
     this.getUserInfosAndCalls();
+    /*
     setInterval(async () => {
       this.getUserInfosAndCalls();
-    }, 5000);
+    }, 3000);
+    */
 
     // developerMode
     this.developerMode =
@@ -131,8 +144,11 @@ export class AdminDashboardComponent implements OnInit {
     window.open(`https://${jitsiDomain}/${targetPlayer.roomName}`);
   }
 
-  closeCall(callRequest: CallRequest) {
+  stopCall(callRequest: CallRequest) {
     WA.event.broadcast(BroadcastEvents.CALL_DECLINED, callRequest);
+    setTimeout(() => {
+      this.getUserInfosAndCalls();
+    }, 500);
   }
 
   teleportToPlayer(targetPlayer: UserInfo) {
@@ -156,10 +172,27 @@ export class AdminDashboardComponent implements OnInit {
     return this.workadventureService.isUserAdmin(player.uuid);
   }
 
-  teleportToObject(object: MapObject) {
+  getMiddleOfObject(object: MapObject) {
     const middleX = object.x + (object.width ?? 0) / 2;
     const middleY = object.y + (object.height ?? 0) / 2;
-    WA.player.teleport(middleX, middleY);
+    return {
+      x: middleX,
+      y: middleY,
+    };
+  }
+
+  teleportToObject(object: MapObject) {
+    const position = this.getMiddleOfObject(object);
+    WA.player.teleport(position.x, position.y);
+  }
+
+  teleportPlayerToObject(userInfo: UserInfo, object: MapObject) {
+    const position = this.getMiddleOfObject(object);
+    WA.event.broadcast(BroadcastEvents.TELEPORT, {
+      playerUUID: userInfo.playerUUID,
+      x: position.x,
+      y: position.y,
+    } as TeleportEvent);
   }
 
   setCountdown() {

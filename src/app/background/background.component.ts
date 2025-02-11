@@ -11,7 +11,10 @@ import {
 } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { CommonModule } from '@angular/common';
 import { isBefore } from 'date-fns';
-import { SetVariableEvent } from '../admin-dashboard/admin-dashboard.component';
+import {
+  SetVariableEvent,
+  TeleportEvent,
+} from '../admin-dashboard/admin-dashboard.component';
 import { CallRequest, Contact } from '../smartphone/smartphone.component';
 
 export interface UserInfo {
@@ -77,6 +80,9 @@ export class BackgroundComponent implements OnInit {
         case BroadcastEvents.SHARE_USER_INFO:
           this.onEventShareUserInfo(event.data as number);
           break;
+        case BroadcastEvents.TELEPORT:
+          this.onEventTeleport(event.data as TeleportEvent);
+          break;
         default:
           break;
       }
@@ -101,6 +107,12 @@ export class BackgroundComponent implements OnInit {
         // Important: do NOT use the value directy
         this.worldtime = this.workadventureService.getVirtualWorldTime();
       });
+  }
+  onEventTeleport(event: TeleportEvent) {
+    if (event.playerUUID !== this.player!.uuid) {
+      return;
+    }
+    WA.player.teleport(event.x, event.y);
   }
 
   onEventSetVariable(setVariableEvent: SetVariableEvent) {

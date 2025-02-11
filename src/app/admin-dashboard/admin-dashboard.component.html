@@ -4,6 +4,7 @@
     icon="pi pi-refresh"
     label="Refresh"
   />
+
   <p class="text-xl"><i class="pi pi-user"></i> Users</p>
   <p-table [value]="userInfos">
     <ng-template #header>
@@ -42,22 +43,47 @@
         <td>
           <div class="flex flex-row gap-3">
             <p-button
-              (onClick)="teleportToPlayer(userInfo)"
-              icon="pi pi-indian-rupee"
-              label="Teleport"
+              (click)="op.toggle($event)"
+              icon="pi pi-cog"
+              label="Actions"
+              severity="help"
             />
-            <p-button
-              icon="pi pi-phone"
-              label="Call"
-              (onClick)="call(userInfo)"
-            />
-            <p-button
-              [label]="
-                userInfo.phoneDisabled ? 'Enable phone' : 'Disable phone'
-              "
-              (onClick)="togglePhone(userInfo)"
-              [severity]="userInfo.phoneDisabled ? 'primary' : 'danger'"
-            />
+            <p-popover #op>
+              <div class="flex flex-row gap-3 mb-3">
+                <p-button
+                  (onClick)="teleportToPlayer(userInfo)"
+                  icon="pi pi-indian-rupee"
+                  label="Teleport yourself to player"
+                />
+                <p-button
+                  icon="pi pi-phone"
+                  label="Call"
+                  (onClick)="call(userInfo)"
+                />
+                <p-button
+                  [label]="
+                    userInfo.phoneDisabled ? 'Enable phone' : 'Disable phone'
+                  "
+                  (onClick)="togglePhone(userInfo)"
+                  [severity]="userInfo.phoneDisabled ? 'primary' : 'danger'"
+                />
+              </div>
+              <div class="flex flex-row gap-3">
+                <p-select
+                  [options]="objects"
+                  optionLabel="name"
+                  [(ngModel)]="selectedObject"
+                  placeholder="Select an object"
+                />
+                <p-button
+                  (onClick)="
+                    op.hide(); teleportPlayerToObject(userInfo, selectedObject!)
+                  "
+                  label="Teleport user to object"
+                  severity="info"
+                />
+              </div>
+            </p-popover>
           </div>
         </td>
       </tr>
@@ -92,7 +118,7 @@
             icon="pi pi-cecline"
             label="Stop call"
             severity="danger"
-            (onClick)="closeCall(call)"
+            (onClick)="stopCall(call)"
           />
         </td>
       </tr>

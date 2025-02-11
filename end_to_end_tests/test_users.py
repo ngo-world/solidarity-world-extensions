@@ -7,7 +7,8 @@ def run(playwright: Playwright) -> None:
     for i in range(1, 10):
         username = f'DavidGengenbach{i}'
         password = '123456'
-        contexts_and_pages.append(start_browser(playwright, username, password))
+        contexts_and_pages.append(
+            start_browser(playwright, username, password))
 
     contexts_and_pages[0][1].pause()
 
@@ -23,6 +24,7 @@ def start_browser(playwright: Playwright, username: str, password: str):
         ignore_https_errors=True
     )
     page = context.new_page()
+    page.route('**', lambda x: x.continue_())
     page.goto("https://workadventure.solidarity-world.de/~/maps/prototype_fund.wam")
     page.get_by_role("textbox", name="Username").click()
     page.get_by_role("textbox", name="Username").fill(username)

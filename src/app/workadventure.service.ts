@@ -39,6 +39,7 @@ export enum BroadcastEvents {
   SET_VARIABLE = 'setVariable',
   SHARE_USER_INFO = 'shareUserInfo',
   SHARE_USER_INFO_RESPONSE = 'shareUserInfoResponse',
+  TELEPORT = 'teleport',
 }
 
 @Injectable({
@@ -249,7 +250,7 @@ export class WorkadventureService {
         subscription.unsubscribe();
         userInfos.sort((a, b) => a.playerName.localeCompare(b.playerName));
         resolveInner(userInfos);
-      }, 2000);
+      }, 500);
     });
   }
 }
