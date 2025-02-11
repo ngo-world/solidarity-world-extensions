@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { timer } from 'rxjs';
 import {
   BroadcastEvents,
   PlayerStateVariables,
@@ -90,15 +91,14 @@ export class BackgroundComponent implements OnInit {
       }
     });
 
-    this.currentCountdownDate = this.workadventureService.getCountdownDate();
+    this.setCurrentCountdownDate();
 
     WA.state
       .onVariableChange(
         WorkadventureService.ROOM_STATE_VARIABLE_COUNTDOWN_TO_DATE,
       )
       .subscribe(() => {
-        this.currentCountdownDate =
-          this.workadventureService.getCountdownDate();
+        this.setCurrentCountdownDate();
       });
 
     this.worldtime = this.workadventureService.getVirtualWorldTime();
@@ -110,6 +110,16 @@ export class BackgroundComponent implements OnInit {
         this.worldtime = this.workadventureService.getVirtualWorldTime();
       });
   }
+
+  setCurrentCountdownDate() {
+    this.currentCountdownDate = this.workadventureService.getCountdownDate();
+    if (this.currentCountdownDate) {
+      timer(this.currentCountdownDate!).subscribe(() => {
+        console.log('YEAH');
+      });
+    }
+  }
+
   onEventTeleport(event: TeleportEvent) {
     if (event.playerUUID !== this.player!.uuid) {
       return;

@@ -189,7 +189,11 @@ export class WorkadventureService {
   }
 
   static getRoomConfig(): MapConfig {
-    return JSON.parse(WA.state.loadVariable('config') as string) as MapConfig;
+    //return JSON.parse(WA.state.loadVariable('config') as string) as MapConfig;
+    return {
+      solidarityWorldExtensionsUrl: 'https://localhost:4200',
+      jitsiDomain: 'jitsi-meet.solidarity-world.de',
+    };
   }
 
   static openAdminDashboard() {
