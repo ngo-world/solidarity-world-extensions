@@ -249,4 +249,11 @@
     (onClick)="toggleDeveloperMode()"
     [severity]="developerMode ? 'primary' : 'danger'"
   />
+
+  <p class="text-xl"><i class="pi pi-cog"></i> Map config</p>
+  <pre>
+{{
+  getConfigAsJsonString()
+}}
+  </pre>
 </div>

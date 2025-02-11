@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Sound } from '@workadventure/iframe-api-typings';
-import { getJitsiConfig, getRoomName, jitsiDomain } from './jitsi-options';
+import { getJitsiConfig, getRoomName } from './jitsi-options';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -34,7 +34,7 @@ export interface CallRequest {
 })
 export class SmartphoneComponent implements OnInit {
   ringingSound: Sound = WA.sound.loadSound(
-    `https://${jitsiDomain}/sounds/outgoingRinging.mp3`,
+    `https://${WorkadventureService.getRoomConfig().jitsiUrl}/sounds/outgoingRinging.mp3`,
   );
   player?: WorkadventurePlayerCommands;
   /**
@@ -178,7 +178,7 @@ export class SmartphoneComponent implements OnInit {
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.api = new (window as any).JitsiMeetExternalAPI(
-      jitsiDomain,
+      WorkadventureService.getRoomConfig().jitsiUrl,
       getJitsiConfig(callRequest.roomName, false, 0, 0),
     );
 
@@ -189,7 +189,7 @@ export class SmartphoneComponent implements OnInit {
       this.ringingSound.stop();
     });
     this.api.addListener('participantLeft', () => {
-      // WA.sound.loadSound(`https://${jitsiDomain}/sounds/left.mp3`).play(undefined);
+      // WA.sound.loadSound(`https://${WorkadventureService.getRoomConfig().jitsiUrl}/sounds/left.mp3`).play(undefined);
       this.stopCall('Call is over');
     });
   }

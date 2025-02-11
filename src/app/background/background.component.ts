@@ -186,7 +186,7 @@ export class BackgroundComponent implements OnInit {
   joinBroadcast(roomName: string) {
     WA.ui.modal.openModal({
       title: 'broadcast',
-      src: `${WorkadventureService.getSolidarityWorldUrl()}/broadcast?roomName=${roomName}`,
+      src: `${WorkadventureService.getRoomConfig().solidarityWorldExtensionsUrl}/broadcast?roomName=${roomName}`,
       allowApi: true,
       position: 'center',
       allow: 'microphone *; screen-wake-lock *; camera',

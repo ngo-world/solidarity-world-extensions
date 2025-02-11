@@ -11,6 +11,11 @@ import { UserInfo } from './background/background.component';
 
 const ADMIN_UUIDS: string[] = ['info@davidgengenbach.de'];
 
+export interface MapConfig {
+  solidarityWorldExtensionsUrl: string;
+  jitsiUrl: string;
+}
+
 export interface WorldTime {
   date: Date;
   offsetInSeconds: number;
@@ -184,18 +189,14 @@ export class WorkadventureService {
     return `+${randomNumber}`;
   }
 
-  static getSolidarityWorldUrl() {
-    const developerMode =
-      WA.player.state.loadVariable('developerMode') || false;
-    return developerMode
-      ? 'https://localhost:4200'
-      : 'https://web.solidarity-world.de';
+  static getRoomConfig(): MapConfig {
+    return JSON.parse(WA.state.loadVariable('config') as string) as MapConfig;
   }
 
   static openAdminDashboard() {
     WA.ui.modal.openModal({
       title: 'adminDashboard',
-      src: `${WorkadventureService.getSolidarityWorldUrl()}/admin-dashboard`,
+      src: `${WorkadventureService.getRoomConfig().solidarityWorldExtensionsUrl}/admin-dashboard`,
       allowApi: true,
       position: 'center',
       allow: null,

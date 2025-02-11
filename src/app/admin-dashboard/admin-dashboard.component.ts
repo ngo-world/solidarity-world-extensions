@@ -10,7 +10,6 @@ import { RemotePlayerInterface } from '@workadventure/iframe-api-typings';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
-import { jitsiDomain } from '../smartphone/jitsi-options';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
 import { add } from 'date-fns';
@@ -83,6 +82,8 @@ export class AdminDashboardComponent implements OnInit {
   playerDocuments: Record<number, string> = {};
   userInfos: UserInfo[] = [];
   selectedObject?: MapObject;
+  WA = WA;
+  JSON = JSON;
 
   constructor(private workadventureService: WorkadventureService) {}
 
@@ -141,7 +142,9 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   joinCall(targetPlayer: CallRequest): void {
-    window.open(`https://${jitsiDomain}/${targetPlayer.roomName}`);
+    window.open(
+      `https://${WorkadventureService.getRoomConfig().jitsiUrl}/${targetPlayer.roomName}`,
+    );
   }
 
   stopCall(callRequest: CallRequest) {
@@ -165,7 +168,9 @@ export class AdminDashboardComponent implements OnInit {
       roomName: 'admin_to_player_',
     };
     WorkadventureService.requestCall(callRequest);
-    window.open(`https://${jitsiDomain}/${callRequest.roomName}`);
+    window.open(
+      `https://${WorkadventureService.getRoomConfig().jitsiUrl}/${callRequest.roomName}`,
+    );
   }
 
   isAdmin(player: RemotePlayerInterface) {
@@ -234,11 +239,15 @@ export class AdminDashboardComponent implements OnInit {
     console.log('Starting broadcast');
     const roomName = 'broadcast';
     WA.event.broadcast(BroadcastEvents.JOIN_BROADCAST, roomName);
-    window.open(`https://${jitsiDomain}/${roomName}`);
+    window.open(
+      `https://${WorkadventureService.getRoomConfig().jitsiUrl}/${roomName}`,
+    );
   }
 
   listenToCall(callRequest: CallRequest) {
-    window.open(`https://${jitsiDomain}/${callRequest.roomName}`);
+    window.open(
+      `https://${WorkadventureService.getRoomConfig().jitsiUrl}/${callRequest.roomName}`,
+    );
   }
 
   getPhoneNumbers(player: UserInfo): string {
@@ -309,6 +318,9 @@ export class AdminDashboardComponent implements OnInit {
       variableName: PlayerStateVariables.PHONE_DISABLED,
       variableValue: !userInfo.phoneDisabled,
     } as SetVariableEvent);
+  }
+  getConfigAsJsonString() {
+    return JSON.stringify(WorkadventureService.getRoomConfig(), null, '\t');
   }
 }
 

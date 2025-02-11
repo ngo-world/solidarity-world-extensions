@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { WorkadventureService } from '../workadventure.service';
-import { getJitsiConfig, jitsiDomain } from '../smartphone/jitsi-options';
+import { getJitsiConfig } from '../smartphone/jitsi-options';
 
 @Component({
   selector: 'app-broadcast',
@@ -21,7 +21,7 @@ export class BroadcastComponent implements OnInit {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.api = new (window as any).JitsiMeetExternalAPI(
-      jitsiDomain,
+      WorkadventureService.getRoomConfig().jitsiUrl,
       getJitsiConfig(roomName, true),
     );
   }
