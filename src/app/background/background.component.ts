@@ -59,7 +59,9 @@ export class BackgroundComponent implements OnInit {
       label: 'Open document',
       callback: () => {
         WA.nav.openCoWebSite(
-          this.player!.state.loadVariable('document') as string,
+          this.player!.state.loadVariable(
+            PlayerStateVariables.DOCUMENT_LINK,
+          ) as string,
         );
       },
     });
