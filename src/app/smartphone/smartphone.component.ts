@@ -64,6 +64,7 @@ export class SmartphoneComponent implements OnInit {
     console.info('Initializing smartphone screen');
     await this.workadventureService.init();
     this.player = this.workadventureService.player!;
+    await this.player!.state.saveVariable(PlayerStateVariables.CALLING, null);
     this.currentUserPhoneNumbers = this.player.state.loadVariable(
       PlayerStateVariables.PHONE_NUMBERS,
     ) as Contact[];
@@ -115,10 +116,6 @@ export class SmartphoneComponent implements OnInit {
   }
 
   onEventCallDeclined(callRequest: CallRequest) {
-    if (!this.callRequest) {
-      return;
-    }
-
     if (
       !this.currentUserPhoneNumbers.find(
         (c) => c.phoneNumber == callRequest.toPhoneNumber,
@@ -130,6 +127,15 @@ export class SmartphoneComponent implements OnInit {
       console.warn('Ignoring call request because the number does not match');
       return;
     }
+
+    if (!this.callRequest) {
+      console.warn(
+        'Ignoring call request because there is no local call request',
+        callRequest,
+      );
+      return;
+    }
+
     console.log(`User declined call`);
     this.stopCall('Other user declined call');
   }
@@ -204,11 +210,10 @@ export class SmartphoneComponent implements OnInit {
 
   async stopCall(reason: string) {
     console.log(`Stopping call because of: ${reason}`);
+    await this.player!.state.saveVariable(PlayerStateVariables.CALLING, null);
     this.ringingSound.stop();
     this.api?.dispose();
     this.api = null;
-
-    await this.player!.state.saveVariable(PlayerStateVariables.CALLING, null);
 
     WA.event.broadcast(BroadcastEvents.CALL_DECLINED, this.callRequest);
     this.callRequest = undefined;

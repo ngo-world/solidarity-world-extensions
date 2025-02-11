@@ -1,4 +1,9 @@
 <div class="p-10 dark-mode grid grid-cols-1 gap-5">
+  <p-button
+    (onClick)="getUserInfosAndCalls()"
+    icon="pi pi-refresh"
+    label="Refresh"
+  />
   <p class="text-xl"><i class="pi pi-user"></i> Users</p>
   <p-table [value]="userInfos">
     <ng-template #header>
@@ -82,6 +87,12 @@
             icon="pi pi-phone"
             label="Join call"
             (onClick)="listenToCall(call)"
+          />
+          <p-button
+            icon="pi pi-cecline"
+            label="Stop call"
+            severity="danger"
+            (onClick)="closeCall(call)"
           />
         </td>
       </tr>

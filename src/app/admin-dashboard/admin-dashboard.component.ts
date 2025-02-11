@@ -114,9 +114,9 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   getCalls(): CallRequest[] {
-    return this.userInfos
-      .filter((i) => !!i.currentCall)
-      .map((i) => i.currentCall);
+    return distinctCalls(
+      this.userInfos.filter((i) => !!i.currentCall).map((i) => i.currentCall),
+    );
   }
 
   playSoundForSelectedPlayers(soundUrl: string): void {
@@ -127,10 +127,12 @@ export class AdminDashboardComponent implements OnInit {
     );
   }
 
-  joinCall(targetPlayer: RemotePlayerInterface): void {
-    const roomName = targetPlayer.state['calling'] as string;
-    window.open(`https://${jitsiDomain}/${roomName}`);
-    //this.api = new (window as any).JitsiMeetExternalAPI(jitsiDomain, getJitsiConfig(roomName, 500, 500));
+  joinCall(targetPlayer: CallRequest): void {
+    window.open(`https://${jitsiDomain}/${targetPlayer.roomName}`);
+  }
+
+  closeCall(callRequest: CallRequest) {
+    WA.event.broadcast(BroadcastEvents.CALL_DECLINED, callRequest);
   }
 
   teleportToPlayer(targetPlayer: UserInfo) {
@@ -275,4 +277,18 @@ export class AdminDashboardComponent implements OnInit {
       variableValue: !userInfo.phoneDisabled,
     } as SetVariableEvent);
   }
+}
+
+function distinctCalls(elements: CallRequest[]): CallRequest[] {
+  return Object.values(
+    elements.reduce(
+      (previous, current) => {
+        if (!(current.roomName in previous)) {
+          previous[current.roomName] = current;
+        }
+        return previous;
+      },
+      {} as Record<string, CallRequest>,
+    ),
+  );
 }

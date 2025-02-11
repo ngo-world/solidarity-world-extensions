@@ -249,7 +249,7 @@ export class WorkadventureService {
         subscription.unsubscribe();
         userInfos.sort((a, b) => a.playerName.localeCompare(b.playerName));
         resolveInner(userInfos);
-      }, 1000);
+      }, 2000);
     });
   }
 }
