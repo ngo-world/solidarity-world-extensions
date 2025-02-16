@@ -191,8 +191,8 @@ export class WorkadventureService {
   static getRoomConfig(): MapConfig {
     //return JSON.parse(WA.state.loadVariable('config') as string) as MapConfig;
     return {
-      //solidarityWorldExtensionsUrl: 'https://localhost:4200',
-      solidarityWorldExtensionsUrl: 'https://web.solidarity-world.de',
+      solidarityWorldExtensionsUrl: 'https://localhost:4200',
+      //solidarityWorldExtensionsUrl: 'https://web.solidarity-world.de',
       jitsiDomain: 'jitsi-meet.solidarity-world.de',
     };
   }
@@ -248,7 +248,7 @@ export class WorkadventureService {
       setTimeout(() => {
         subscription.unsubscribe();
         userInfos.sort((a, b) => a.playerName.localeCompare(b.playerName));
-        resolveInner(userInfos);
+        resolveInner(Array.from(new Set(userInfos)));
       }, 500);
     });
   }

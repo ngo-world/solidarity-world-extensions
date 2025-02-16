@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { RemotePlayerInterface } from '@workadventure/iframe-api-typings';
 import { CheckboxChangeEvent, CheckboxModule } from 'primeng/checkbox';
+import { UserInfo } from '../background/background.component';
 
 @Component({
   selector: 'app-player-selector',
@@ -11,12 +11,11 @@ import { CheckboxChangeEvent, CheckboxModule } from 'primeng/checkbox';
   styleUrl: './player-selector.component.scss',
 })
 export class PlayerSelectorComponent {
-  @Input() players?: RemotePlayerInterface[];
-  @Output() selectedPlayers = new EventEmitter<Set<RemotePlayerInterface>>();
-  private _selectedPlayers: Set<RemotePlayerInterface> =
-    new Set<RemotePlayerInterface>();
+  @Input() userInfos?: UserInfo[];
+  @Output() selectedPlayers = new EventEmitter<Set<UserInfo>>();
+  private _selectedPlayers: Set<UserInfo> = new Set<UserInfo>();
 
-  onChange($event: CheckboxChangeEvent, player: RemotePlayerInterface) {
+  onChange($event: CheckboxChangeEvent, player: UserInfo) {
     const isSelected = $event.checked?.length > 0;
     if (isSelected) {
       this._selectedPlayers.add(player);

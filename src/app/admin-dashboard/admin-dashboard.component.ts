@@ -30,6 +30,11 @@ interface MapObject {
   height?: number;
 }
 
+export interface PlaySoundEvent {
+  playerIds: number[];
+  soundUrl: string;
+}
+
 export interface SetVariableEvent {
   playerUUID: string;
   variableName: string;
@@ -62,11 +67,9 @@ export interface TeleportEvent {
   styleUrl: './admin-dashboard.component.scss',
 })
 export class AdminDashboardComponent implements OnInit {
-  selectedPlayersToPlaySound: Set<RemotePlayerInterface> =
-    new Set<RemotePlayerInterface>();
+  selectedPlayersToPlaySound: Set<UserInfo> = new Set<UserInfo>();
 
   player?: WorkadventurePlayerCommands;
-  players: RemotePlayerInterface[] = [];
   api: unknown;
   areas: MapObject[] = [];
   countdownMinutes = 10;
@@ -122,11 +125,13 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   playSoundForSelectedPlayers(soundUrl: string): void {
-    throw new Error('Not implemented');
-    Array.from(this.selectedPlayersToPlaySound).forEach((p) =>
-      // ToDo
-      p.sendEvent(BroadcastEvents.PLAY_SOUND, soundUrl),
+    const playerIds = Array.from(this.selectedPlayersToPlaySound).map(
+      (p) => p.id,
     );
+    WA.event.broadcast(BroadcastEvents.PLAY_SOUND, {
+      playerIds: playerIds,
+      soundUrl,
+    } as PlaySoundEvent);
   }
 
   joinCall(targetPlayer: CallRequest): void {

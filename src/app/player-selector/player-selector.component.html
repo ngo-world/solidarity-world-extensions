@@ -1,11 +1,11 @@
-<div *ngFor="let player of players">
+<div *ngFor="let player of userInfos">
   <p-checkbox
-    [inputId]="player.playerId.toString()"
-    [value]="player.playerId.toString()"
+    [inputId]="player.id.toString()"
+    [value]="player.id.toString()"
     (onChange)="onChange($event, player)"
   />
-  <label [for]="player.playerId.toString()" class="ml-2">
-    {{ player.name }}</label
+  <label [for]="player.id.toString()" class="ml-2">
+    {{ player.playerName }} (ID: {{player.id}})</label
   >
 </div>
-<div *ngIf="players?.length === 0">(No players found)</div>
+<div *ngIf="userInfos?.length === 0">(No players found)</div>

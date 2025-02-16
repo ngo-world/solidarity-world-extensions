@@ -13,6 +13,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { isBefore } from 'date-fns';
 import {
+  PlaySoundEvent,
   SetVariableEvent,
   TeleportEvent,
 } from '../admin-dashboard/admin-dashboard.component';
@@ -20,6 +21,7 @@ import { CallRequest, Contact } from '../smartphone/smartphone.component';
 import { Sound } from '@workadventure/iframe-api-typings';
 
 export interface UserInfo {
+  id: number;
   requestId: number;
   playerUUID: string;
   playerName: string;
@@ -76,7 +78,7 @@ export class BackgroundComponent implements OnInit {
     this.workadventureService.eventsSubject.subscribe((event) => {
       switch (event.name) {
         case BroadcastEvents.PLAY_SOUND:
-          this.playSound(event.data! as string);
+          this.playSound(event.data! as PlaySoundEvent);
           break;
         case BroadcastEvents.SET_VARIABLE:
           this.onEventSetVariable(event.data as SetVariableEvent);
@@ -154,6 +156,7 @@ export class BackgroundComponent implements OnInit {
       PlayerStateVariables.PHONE_NUMBERS,
     ) as Contact[];
     const userInfo: UserInfo = {
+      id: this.player!.playerId,
       requestId: requestId,
       playerUUID: this.player!.uuid!,
       playerName: this.player!.name,
@@ -196,9 +199,13 @@ export class BackgroundComponent implements OnInit {
     );
   }
 
-  playSound(soundUrl: string) {
-    console.info(`Playing sound ${soundUrl}`);
-    WA.sound.loadSound(soundUrl).play({
+  playSound(event: PlaySoundEvent) {
+    if (event.playerIds.indexOf(WA.player.playerId) < 0) {
+      return;
+    }
+
+    console.info(`Playing sound ${event.soundUrl}`);
+    WA.sound.loadSound(event.soundUrl).play({
       volume: 1,
     });
   }

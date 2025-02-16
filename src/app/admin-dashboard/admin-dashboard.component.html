@@ -9,6 +9,7 @@
   <p-table [value]="userInfos">
     <ng-template #header>
       <tr>
+        <th>ID</th>
         <th>UUID</th>
         <th>Name</th>
         <th>Phone numbers</th>
@@ -18,6 +19,7 @@
     </ng-template>
     <ng-template #body let-userInfo>
       <tr>
+        <td>{{ userInfo.id }}</td>
         <td>{{ userInfo.playerUUID }}</td>
         <td>{{ userInfo.playerName }}</td>
         <td>
@@ -194,7 +196,7 @@
     <div class="mb-3">
       <p>Select players that should hear the sound:</p>
       <app-player-selector
-        [players]="players"
+        [userInfos]="userInfos"
         (selectedPlayers)="selectedPlayersToPlaySound = $event"
       ></app-player-selector>
     </div>
