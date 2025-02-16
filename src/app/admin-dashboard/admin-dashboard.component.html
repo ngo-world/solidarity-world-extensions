@@ -33,11 +33,6 @@
               [value]="userInfo.documentLink"
               (change)="setPlayerDocument($event, userInfo)"
             />
-            <p-button
-              icon="pi pi-link"
-              label="Open document"
-              (onClick)="openDocument(userInfo)"
-            />
           </div>
         </td>
         <td>
@@ -67,19 +62,24 @@
                   (onClick)="togglePhone(userInfo)"
                   [severity]="userInfo.phoneDisabled ? 'primary' : 'danger'"
                 />
+                <p-button
+                  icon="pi pi-link"
+                  label="Open document"
+                  (onClick)="openDocument(userInfo)"
+                />
               </div>
               <div class="flex flex-row gap-3">
                 <p-select
-                  [options]="objects"
+                  [options]="areas"
                   optionLabel="name"
                   [(ngModel)]="selectedObject"
                   placeholder="Select an object"
                 />
                 <p-button
                   (onClick)="
-                    op.hide(); teleportPlayerToObject(userInfo, selectedObject!)
+                    op.hide(); teleportPlayerToArea(userInfo, selectedObject!)
                   "
-                  label="Teleport user to object"
+                  label="Teleport user to area"
                   severity="info"
                 />
               </div>
@@ -182,7 +182,7 @@
 
   <div class="flex gap-3 flex-wrap">
     <p-button
-      *ngFor="let object of objects"
+      *ngFor="let object of areas"
       (onClick)="teleportToObject(object)"
       [label]="'#' + object.name"
       severity="info"

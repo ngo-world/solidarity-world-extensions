@@ -64,6 +64,7 @@ export class SmartphoneComponent implements OnInit {
     console.info('Initializing smartphone screen');
     await this.workadventureService.init();
     this.player = this.workadventureService.player!;
+
     await this.player!.state.saveVariable(PlayerStateVariables.CALLING, null);
     this.currentUserPhoneNumbers = this.player.state.loadVariable(
       PlayerStateVariables.PHONE_NUMBERS,
@@ -224,14 +225,6 @@ export class SmartphoneComponent implements OnInit {
     this.joinCall(this.callRequest!, false);
   }
 
-  // ToDo: this is only needed when hot reloading
-  async reload() {
-    const currentPopup = (await WA.ui.website.getAll()).find((x) =>
-      x.url.endsWith('/smartphone'),
-    );
-    currentPopup?.close();
-  }
-
   async addContact(contactName: string, phoneNumber: string) {
     this.contacts.push({
       contactName,
@@ -243,17 +236,17 @@ export class SmartphoneComponent implements OnInit {
     this.phoneNumberToAdd = '';
   }
 
-  removeContact(contact: Contact) {
+  async removeContact(contact: Contact) {
     const index = this.contacts.indexOf(contact);
     if (index > -1) {
       this.contacts.splice(index, 1);
     } else {
       console.error('Could not find contact', contact, this.contacts);
     }
-    this.saveContacts();
+    await this.saveContacts();
   }
 
-  private saveContacts() {
-    WA.player.state['contacts'] = this.contacts;
+  private async saveContacts() {
+    await WA.player.state.saveVariable('contacts', this.contacts);
   }
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { timer } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
 import {
   BroadcastEvents,
   PlayerStateVariables,
@@ -17,6 +17,7 @@ import {
   TeleportEvent,
 } from '../admin-dashboard/admin-dashboard.component';
 import { CallRequest, Contact } from '../smartphone/smartphone.component';
+import { Sound } from '@workadventure/iframe-api-typings';
 
 export interface UserInfo {
   requestId: number;
@@ -37,6 +38,10 @@ export interface UserInfo {
   styleUrl: './background.component.scss',
 })
 export class BackgroundComponent implements OnInit {
+  // ToDo: https://directory.audio/sound-effects/alarms/23085-alarm-clock-simple
+  countdownSound: Sound = WA.sound.loadSound(
+    '/map-storage/maps/alarm-clock-going-off.mp3',
+  );
   worldtime: WorldTime = {
     date: new Date(),
     offsetInSeconds: 0,
@@ -45,6 +50,7 @@ export class BackgroundComponent implements OnInit {
   player?: WorkadventurePlayerCommands;
   currentCountdownDate?: Date;
   api: unknown;
+  countdownTimer?: Subscription;
 
   constructor(private workadventureService: WorkadventureService) {}
 
@@ -113,9 +119,10 @@ export class BackgroundComponent implements OnInit {
 
   setCurrentCountdownDate() {
     this.currentCountdownDate = this.workadventureService.getCountdownDate();
-    if (this.currentCountdownDate) {
-      timer(this.currentCountdownDate!).subscribe(() => {
-        console.log('YEAH');
+    this.countdownTimer?.unsubscribe();
+    if (this.currentCountdownDate && this.currentCountdownDate > new Date()) {
+      this.countdownTimer = timer(this.currentCountdownDate!).subscribe(() => {
+        this.countdownSound.play({});
       });
     }
   }

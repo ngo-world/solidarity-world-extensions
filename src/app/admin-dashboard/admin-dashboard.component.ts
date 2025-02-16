@@ -68,7 +68,7 @@ export class AdminDashboardComponent implements OnInit {
   player?: WorkadventurePlayerCommands;
   players: RemotePlayerInterface[] = [];
   api: unknown;
-  objects: MapObject[] = [];
+  areas: MapObject[] = [];
   countdownMinutes = 10;
   countdownSeconds = 0;
   worldTimeHours = 12;
@@ -102,10 +102,11 @@ export class AdminDashboardComponent implements OnInit {
 
     // areas
     const map = await WA.room.getTiledMap();
-    this.objects = map.layers
+    this.areas = map.layers
       .filter((i) => i.type == 'objectgroup')
       .map((i) => i.objects)
       .flat()
+      .filter((i) => i.type === 'area')
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -178,7 +179,7 @@ export class AdminDashboardComponent implements OnInit {
     WA.player.teleport(position.x, position.y);
   }
 
-  teleportPlayerToObject(userInfo: UserInfo, object: MapObject) {
+  teleportPlayerToArea(userInfo: UserInfo, object: MapObject) {
     const position = this.getMiddleOfObject(object);
     WA.event.broadcast(BroadcastEvents.TELEPORT, {
       playerUUID: userInfo.playerUUID,
