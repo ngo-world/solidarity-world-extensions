@@ -106,11 +106,11 @@ export class AdminDashboardComponent implements OnInit {
 
     // areas
     const map = await WA.room.getTiledMap();
+
     this.areas = map.layers
       .filter((i) => i.type == 'objectgroup')
       .map((i) => i.objects)
       .flat()
-      //.filter((i) => i.type === 'area')
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 

@@ -63,6 +63,8 @@ export class BackgroundComponent implements OnInit {
     this.player = this.workadventureService.player!;
     console.info('Player', this.player);
 
+    this.addAreaListeners();
+
     WA.ui.actionBar.addButton({
       id: 'openDocument',
       label: 'Open document',
@@ -117,6 +119,16 @@ export class BackgroundComponent implements OnInit {
         // Important: do NOT use the value directy
         this.worldtime = this.workadventureService.getVirtualWorldTime();
       });
+  }
+  addAreaListeners() {
+    const myAreaSubscriber = WA.room.area.onEnter('cellar').subscribe(() => {
+      WA.chat.sendChatMessage('Hello!', 'Mr Robot');
+    });
+
+    WA.room.area.onLeave('cellar').subscribe(() => {
+      WA.chat.sendChatMessage('Goodbye!', 'Mr Robot');
+      myAreaSubscriber.unsubscribe();
+    });
   }
 
   setCurrentCountdownDate() {
