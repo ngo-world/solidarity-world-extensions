@@ -29,7 +29,6 @@
             {{ contact.phoneNumber }}
           </p>
         </td>
-        <td>{{ !userInfo.phoneDisabled }}</td>
         <td>
           <div class="flex flex-row gap-3">
             <input
@@ -38,6 +37,16 @@
               (change)="setPlayerDocument($event, userInfo)"
             />
           </div>
+        </td>
+        <td>
+          <i
+            class="pi"
+            [ngClass]="{
+              'pi-check': !userInfo.phoneDisabled,
+              'pi-times': userInfo.phoneDisabled,
+            }"
+            [ngStyle]="{ color: userInfo.phoneDisabled ? 'red' : 'green' }"
+          ></i>
         </td>
         <td>
           <div class="flex flex-row gap-3">

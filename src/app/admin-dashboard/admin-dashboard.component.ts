@@ -22,7 +22,7 @@ import { PlayerSelectorComponent } from '../player-selector/player-selector.comp
 import { UserInfo } from '../background/background.component';
 import { SelectModule } from 'primeng/select';
 
-interface MapObject {
+export interface MapObject {
   name: string;
   x: number;
   y: number;
@@ -104,14 +104,7 @@ export class AdminDashboardComponent implements OnInit {
     });
     console.error('ToDo: filter by areas again');
 
-    // areas
-    const map = await WA.room.getTiledMap();
-
-    this.areas = map.layers
-      .filter((i) => i.type == 'objectgroup')
-      .map((i) => i.objects)
-      .flat()
-      .sort((a, b) => a.name.localeCompare(b.name));
+    this.areas = await this.workadventureService.getAreas();
   }
 
   async getUserInfosAndCalls() {

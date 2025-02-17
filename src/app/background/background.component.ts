@@ -20,6 +20,10 @@ import {
 import { CallRequest, Contact } from '../smartphone/smartphone.component';
 import { Sound } from '@workadventure/iframe-api-typings';
 
+export enum Areas {
+  FLOOR_CELLAR = 'floor-cellar',
+}
+
 export interface UserInfo {
   id: number;
   requestId: number;
@@ -120,15 +124,46 @@ export class BackgroundComponent implements OnInit {
         this.worldtime = this.workadventureService.getVirtualWorldTime();
       });
   }
-  addAreaListeners() {
-    const myAreaSubscriber = WA.room.area.onEnter('cellar').subscribe(() => {
-      WA.chat.sendChatMessage('Hello!', 'Mr Robot');
+  async addAreaListeners() {
+    const areaNames = (await this.workadventureService.getAreas()).map(
+      (a) => a.name,
+    );
+
+    Object.values(Areas).map((a) => {
+      if (areaNames.indexOf(a) < 0) {
+        console.error(
+          `Known area is not part of the map. Got: "${a}". Areas on the map: "${areaNames}"`,
+        );
+      }
     });
 
-    WA.room.area.onLeave('cellar').subscribe(() => {
-      WA.chat.sendChatMessage('Goodbye!', 'Mr Robot');
-      myAreaSubscriber.unsubscribe();
+    console.info('Areas on the map', areaNames);
+    console.info('Known areas', Object.values(Areas));
+    areaNames.forEach((a) => {
+      WA.room.area.onEnter(a).subscribe(() => this.enteredArea(a));
+      WA.room.area.onLeave(a).subscribe(() => this.leftArea(a));
     });
+  }
+
+  enteredArea(name: string): void {
+    switch (name) {
+      case Areas.FLOOR_CELLAR:
+        this.workadventureService.setPhoneEnabled(false);
+        break;
+      default:
+        this.workadventureService.setPhoneEnabled(true);
+        break;
+    }
+  }
+
+  leftArea(name: string): void {
+    switch (name) {
+      case Areas.FLOOR_CELLAR:
+        this.workadventureService.setPhoneEnabled(true);
+        break;
+      default:
+        break;
+    }
   }
 
   setCurrentCountdownDate() {

@@ -8,6 +8,10 @@ import { formatISO, parseISO } from 'date-fns';
 import { Subject } from 'rxjs';
 import { CallRequest } from './smartphone/smartphone.component';
 import { UserInfo } from './background/background.component';
+import {
+  MapObject,
+  SetVariableEvent,
+} from './admin-dashboard/admin-dashboard.component';
 
 const ADMIN_UUIDS: string[] = [
   'info@davidgengenbach.de',
@@ -194,7 +198,7 @@ export class WorkadventureService {
   static getRoomConfig(): MapConfig {
     //return JSON.parse(WA.state.loadVariable('config') as string) as MapConfig;
     return {
-      solidarityWorldExtensionsUrl: 'https://localhost:4200',
+      solidarityWorldExtensionsUrl: window.location.origin,
       // solidarityWorldExtensionsUrl: 'https://web.solidarity-world.de',
       jitsiDomain: 'jitsi-meet.solidarity-world.de',
     };
@@ -254,5 +258,24 @@ export class WorkadventureService {
         resolveInner(Array.from(new Set(userInfos)));
       }, 500);
     });
+  }
+
+  async setPhoneEnabled(enabled: boolean) {
+    console.info(`Setting phone enabled: ${enabled}`);
+    const event: SetVariableEvent = {
+      playerUUID: WA.player.uuid!,
+      variableName: PlayerStateVariables.PHONE_DISABLED,
+      variableValue: !enabled,
+    };
+    WA.event.broadcast(BroadcastEvents.SET_VARIABLE, event);
+  }
+
+  async getAreas(): Promise<MapObject[]> {
+    return (await WA.room.getTiledMap()).layers
+      .filter((i) => i.type == 'objectgroup')
+      .map((i) => i.objects)
+      .flat()
+      .filter((i) => i.type === 'area')
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 }
