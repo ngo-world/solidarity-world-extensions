@@ -9,7 +9,10 @@ import { Subject } from 'rxjs';
 import { CallRequest } from './smartphone/smartphone.component';
 import { UserInfo } from './background/background.component';
 
-const ADMIN_UUIDS: string[] = ['info@davidgengenbach.de'];
+const ADMIN_UUIDS: string[] = [
+  'info@davidgengenbach.de',
+  'johannes@directaction.training',
+];
 
 export interface MapConfig {
   solidarityWorldExtensionsUrl: string;
