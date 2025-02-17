@@ -102,6 +102,7 @@ export class AdminDashboardComponent implements OnInit {
     this.player.state.onVariableChange('phoneNumbers').subscribe((value) => {
       this.adminPhoneNumbers = value as Contact[];
     });
+    console.error('ToDo: filter by areas again');
 
     // areas
     const map = await WA.room.getTiledMap();
@@ -109,7 +110,7 @@ export class AdminDashboardComponent implements OnInit {
       .filter((i) => i.type == 'objectgroup')
       .map((i) => i.objects)
       .flat()
-      .filter((i) => i.type === 'area')
+      //.filter((i) => i.type === 'area')
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
