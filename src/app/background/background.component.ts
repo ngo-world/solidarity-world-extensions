@@ -23,6 +23,8 @@ import { Sound } from '@workadventure/iframe-api-typings';
 export enum Areas {
   FLOOR_CELLAR = 'floor-cellar',
   LABYRINTH_START = 'StartLabyrinth',
+  WIN_ZOOM = 'WinZoom',
+  GAMEOVER_ZOOM = 'GameoverZoom',
 }
 
 export interface UserInfo {
@@ -151,6 +153,8 @@ export class BackgroundComponent implements OnInit {
       case Areas.FLOOR_CELLAR:
         this.workadventureService.setPhoneEnabled(false);
         break;
+      case Areas.GAMEOVER_ZOOM:
+      case Areas.WIN_ZOOM:
       case Areas.LABYRINTH_START:
         WA.controls.disableWheelZoom();
         break;
