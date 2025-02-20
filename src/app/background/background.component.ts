@@ -22,6 +22,7 @@ import { Sound } from '@workadventure/iframe-api-typings';
 
 export enum Areas {
   FLOOR_CELLAR = 'floor-cellar',
+  LABYRINTH_START = 'StartLabyrinth',
 }
 
 export interface UserInfo {
@@ -149,6 +150,9 @@ export class BackgroundComponent implements OnInit {
     switch (name) {
       case Areas.FLOOR_CELLAR:
         this.workadventureService.setPhoneEnabled(false);
+        break;
+      case Areas.LABYRINTH_START:
+        WA.controls.disableWheelZoom();
         break;
       default:
         this.workadventureService.setPhoneEnabled(true);
