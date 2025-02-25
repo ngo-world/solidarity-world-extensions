@@ -4,6 +4,7 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
 import { BackgroundComponent } from './background/background.component';
 import { BroadcastComponent } from './broadcast/broadcast.component';
 import { HomeComponent } from './home/home.component';
+import { CarComponent } from './car/car.component';
 
 export const routes: Routes = [
   { path: 'smartphone', component: SmartphoneComponent },
@@ -11,5 +12,6 @@ export const routes: Routes = [
   { path: 'background', component: BackgroundComponent },
   { path: 'broadcast', component: BroadcastComponent },
   { path: 'home', component: HomeComponent },
+  { path: 'car', component: CarComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
 ];

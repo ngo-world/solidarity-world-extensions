@@ -83,6 +83,40 @@ export class BackgroundComponent implements OnInit {
         );
       },
     });
+    /*
+    const website = WA.room.website.create({
+      name: 'car',
+      url: `${WorkadventureService.getRoomConfig().solidarityWorldExtensionsUrl}/car`,
+      position: {
+        x: 1000,
+        y: 1000,
+        width: 305,
+        height: 165,
+      },
+      visible: true,
+      allowApi: true,
+      allow: 'fullscreen',
+      origin: 'map',
+      scale: 1,
+    });
+
+    WA.player.onPlayerMove((x) => {
+      website.x = x.x - 150;
+      website.y = x.y - 80;
+    });
+
+    function getRandomArbitrary(min: number, max: number) {
+      return Math.random() * (max - min) + min;
+    }
+
+    setInterval(() => {
+      WA.player.moveTo(
+        getRandomArbitrary(0, 1000),
+        getRandomArbitrary(0, 1000),
+        30,
+      );
+    }, 1000);
+    */
 
     this.workadventureService.eventsSubject.subscribe((event) => {
       switch (event.name) {
