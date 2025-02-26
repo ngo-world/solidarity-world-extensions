@@ -18,7 +18,7 @@ import {
   TeleportEvent,
 } from '../admin-dashboard/admin-dashboard.component';
 import { CallRequest, Contact } from '../smartphone/smartphone.component';
-import { Sound } from '@workadventure/iframe-api-typings';
+import { Popup, Sound } from '@workadventure/iframe-api-typings';
 
 export enum Areas {
   FLOOR_CELLAR = 'floor-cellar',
@@ -71,6 +71,7 @@ export class BackgroundComponent implements OnInit {
     console.info('Player', this.player);
 
     this.addAreaListeners();
+    this.addPopups();
 
     WA.ui.actionBar.addButton({
       id: 'openDocument',
@@ -160,6 +161,32 @@ export class BackgroundComponent implements OnInit {
         // Important: do NOT use the value directy
         this.worldtime = this.workadventureService.getVirtualWorldTime();
       });
+  }
+  addPopups() {
+    WA.ui.openPopup(
+      'PopupStartRoom',
+      'Ohh shit, du bist aufgewacht in einem dunklen Keller. Pass auf: nur eine Tür führt in die Freiheit. Zum Glück hast du eine Nummer, die du anrufen kannst, um dir Hilfe zu holen.',
+      [
+        {
+          label: 'Schließen',
+          callback: function (popup: Popup): void {
+            popup.close();
+          },
+        },
+      ],
+    );
+    WA.ui.openPopup(
+      'PopupOffice',
+      'Ein ganz normaler Tag im Büro, schau dich um und guck welche Informationen du findest.',
+      [
+        {
+          label: 'Schließen',
+          callback: function (popup: Popup): void {
+            popup.close();
+          },
+        },
+      ],
+    );
   }
   async addAreaListeners() {
     const areaNames = (await this.workadventureService.getAreas()).map(
