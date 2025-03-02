@@ -73,17 +73,7 @@ export class BackgroundComponent implements OnInit {
     this.addAreaListeners();
     this.addPopups();
 
-    WA.ui.actionBar.addButton({
-      id: 'openDocument',
-      label: 'Open document',
-      callback: () => {
-        WA.nav.openCoWebSite(
-          this.player!.state.loadVariable(
-            PlayerStateVariables.DOCUMENT_LINK,
-          ) as string,
-        );
-      },
-    });
+    this.listenToDocumentChanges();
     /*
     const website = WA.room.website.create({
       name: 'car',
@@ -162,10 +152,54 @@ export class BackgroundComponent implements OnInit {
         this.worldtime = this.workadventureService.getVirtualWorldTime();
       });
   }
+
+  listenToDocumentChanges() {
+    function addButtonIfNeccesary(documentLink: string) {
+      WA.ui.actionBar.removeButton('openDocument');
+      if (!documentLink) {
+        return;
+      }
+
+      WA.ui.actionBar.addButton({
+        id: 'openDocument',
+        label: 'Document',
+        callback: () => {
+          WA.nav.openCoWebSite(documentLink);
+        },
+      });
+    }
+    WA.player.state
+      .onVariableChange(PlayerStateVariables.DOCUMENT_LINK)
+      .subscribe(() => {
+        addButtonIfNeccesary(
+          WA.player.state[PlayerStateVariables.DOCUMENT_LINK] as string,
+        );
+      });
+  }
+
   addPopups() {
     WA.ui.openPopup(
       'PopupStartRoom',
-      'Ohh shit, du bist aufgewacht in einem dunklen Keller. Pass auf: nur eine Tür führt in die Freiheit. Zum Glück hast du eine Nummer, die du anrufen kannst, um dir Hilfe zu holen.',
+      'Du bist aufgewacht in einem dunklen Keller. Pass auf: nur eine Tür führt in die Freiheit. Zum Glück hast du eine Nummer, die du anrufen kannst, um dir Hilfe zu holen.',
+      [
+        {
+          label: 'Schließen',
+          callback: function (popup: Popup): void {
+            popup.close();
+          },
+        },
+      ],
+    );
+    WA.ui.openPopup(
+      'StartGame',
+      `Willkommen zum Prototype Fund Demo Day Mini-Game! 
+
+      1) Öffne und schließe dein virtuelles Smartphone über den "Smartphone" Knopf
+      2) Das Spiel beginnt, sobald Du und dein Spielpartner die Startfelder betreten
+      3) Einer von euch beiden geht ins Backoffice, die andere Person ins Labyrinth
+
+      Viel Spaß!
+      `,
       [
         {
           label: 'Schließen',
@@ -177,7 +211,7 @@ export class BackgroundComponent implements OnInit {
     );
     WA.ui.openPopup(
       'PopupOffice',
-      'Ein ganz normaler Tag im Büro, schau dich um und guck welche Informationen du findest.',
+      'Ein ganz normaler Tag im Büro, blick dich gerne um und schaue, welche Informationen du so findest.',
       [
         {
           label: 'Schließen',

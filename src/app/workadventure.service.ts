@@ -115,7 +115,7 @@ export class WorkadventureService {
 
     WA.ui.actionBar.addButton({
       id: 'toggleSmartPhoneButton',
-      label: 'Toggle smartphone',
+      label: 'Smartphone',
       callback: async () => {
         WA.player.state.saveVariable(
           'smartphoneShown',
@@ -127,7 +127,7 @@ export class WorkadventureService {
     if (WorkadventureService.currentUserIsAdmin()) {
       WA.ui.actionBar.addButton({
         id: 'openAdminDashboard',
-        label: 'Open admin dashboard',
+        label: 'Admin dashboard',
         callback: () => WorkadventureService.openAdminDashboard(),
       });
     }
