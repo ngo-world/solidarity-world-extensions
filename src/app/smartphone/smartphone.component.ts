@@ -185,7 +185,9 @@ export class SmartphoneComponent implements OnInit {
       },
       () => {
         this.ringingSound.stop();
-        // WA.sound.loadSound(`${WorkadventureService.getRoomConfig().jitsiUrl}/sounds/left.mp3`).play(undefined);
+        WA.sound
+          .loadSound(`${location.origin}/phone-call-disconnect.mp3`)
+          .play(undefined);
         this.stopCall('Call is over');
       },
     );

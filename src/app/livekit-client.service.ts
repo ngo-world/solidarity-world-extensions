@@ -42,6 +42,7 @@ export class LivekitClientService {
     onParticipantJoined: () => void,
     onParticipantLeft: () => void,
   ): Promise<Room> {
+    const elements: HTMLMediaElement[] = [];
     const room = new Room({
       adaptiveStream: true,
       dynacast: true,
@@ -57,15 +58,13 @@ export class LivekitClientService {
       .on(RoomEvent.Disconnected, handleDisconnect)
       .on(RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished);
 
-    // connect to room
-    await room.connect(this.LIVEKIT_API_URL, token);
-    console.log('Connected to room', room.name);
-    console.log('Participant name', room.localParticipant.name);
-
-    await room.localParticipant.setMicrophoneEnabled(true);
-    //await room.localParticipant.setCameraEnabled(true);
-
-    const elements: HTMLMediaElement[] = [];
+    (async () => {
+      await room.connect(this.LIVEKIT_API_URL, token);
+      console.log('Connected to room', room.name);
+      console.log('Participant name', room.localParticipant.name);
+      await room.localParticipant.setMicrophoneEnabled(true);
+      //await room.localParticipant.setCameraEnabled(true);
+    })();
 
     function handleTrackSubscribed(
       track: RemoteTrack,
