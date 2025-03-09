@@ -26,7 +26,7 @@
       <!-- Another user calls this user -->
       <div
         *ngIf="
-          !api && callRequest && callRequest?.fromPlayerName !== player?.name
+          !room && callRequest && callRequest?.fromPlayerName !== player?.name
         "
         class="content-center grid justify-items-center"
       >
@@ -53,7 +53,7 @@
       </div>
       <!-- This user calls another user -->
       <div
-        *ngIf="api && callRequest?.fromPlayerName === player?.name"
+        *ngIf="room && callRequest?.fromPlayerName === player?.name"
         class="content-center grid justify-items-center"
       >
         <p class="mb-4">
@@ -71,7 +71,7 @@
       </div>
       <!-- This user was called by another user -->
       <div
-        *ngIf="api && callRequest?.fromPlayerName !== player?.name"
+        *ngIf="room && callRequest?.fromPlayerName !== player?.name"
         class="content-center grid justify-items-center"
       >
         <p class="mb-4">
@@ -88,7 +88,7 @@
         ></p-button>
       </div>
       <!-- Contacts -->
-      <div *ngIf="!api && !callRequest" class="flex flex-col gap-2">
+      <div *ngIf="!room && !callRequest" class="flex flex-col gap-2">
         <h2 class="text-xl mb-3">Contacts</h2>
         <div class="mb-4">
           <div *ngIf="contacts.length === 0">No contacts added yet.</div>

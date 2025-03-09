@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Sound } from '@workadventure/iframe-api-typings';
-import { getJitsiConfig, getRoomName } from './jitsi-options';
+import { getRoomName } from './jitsi-options';
 import { WorkadventurePlayerCommands } from '@workadventure/iframe-api-typings/play/src/front/Api/Iframe/player';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -11,6 +11,8 @@ import {
   PlayerStateVariables,
   WorkadventureService,
 } from '../workadventure.service';
+import { LivekitClientService } from '../livekit-client.service';
+import { Room } from 'livekit-client';
 
 export interface Contact {
   contactName: string;
@@ -37,15 +39,6 @@ export class SmartphoneComponent implements OnInit {
     `https://${WorkadventureService.getRoomConfig().jitsiDomain}/sounds/outgoingRinging.mp3`,
   );
   player?: WorkadventurePlayerCommands;
-  /**
-   * See https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-iframe
-   *
-   * ToDo: find TypeScript typings
-   *
-   * The type is JitsiMeetExternalAPI
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  api: any;
   showSmartphone = false;
   callRequest?: CallRequest;
   phoneNumberToAdd = '';
@@ -53,6 +46,7 @@ export class SmartphoneComponent implements OnInit {
   contacts: Contact[] = [];
   currentUserPhoneNumbers: Contact[] = [];
   phoneEnabled = false;
+  room?: Room;
 
   constructor(private workadventureService: WorkadventureService) {}
 
@@ -116,7 +110,12 @@ export class SmartphoneComponent implements OnInit {
     });
   }
 
-  onEventCallDeclined(callRequest: CallRequest) {
+  onEventCallDeclined(callRequest?: CallRequest) {
+    if (!callRequest) {
+      console.error('Received CALL_DECLINED without CallRequest. Ignoring');
+      return;
+    }
+
     if (
       !this.currentUserPhoneNumbers.find(
         (c) => c.phoneNumber == callRequest.toPhoneNumber,
@@ -177,22 +176,23 @@ export class SmartphoneComponent implements OnInit {
       PlayerStateVariables.CALLING,
       callRequest,
     );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.api = new (window as any).JitsiMeetExternalAPI(
-      WorkadventureService.getRoomConfig().jitsiDomain,
-      getJitsiConfig(callRequest.roomName, false, 0, 0),
+
+    this.room = await LivekitClientService.joinRoom(
+      callRequest.roomName,
+      WA.player.name,
+      () => {
+        this.ringingSound.stop();
+      },
+      () => {
+        this.ringingSound.stop();
+        // WA.sound.loadSound(`${WorkadventureService.getRoomConfig().jitsiUrl}/sounds/left.mp3`).play(undefined);
+        this.stopCall('Call is over');
+      },
     );
 
     if (playRingingSound) {
       this.ringingSound.play({ loop: true });
     }
-    this.api.addListener('participantJoined', () => {
-      this.ringingSound.stop();
-    });
-    this.api.addListener('participantLeft', () => {
-      // WA.sound.loadSound(`${WorkadventureService.getRoomConfig().jitsiUrl}/sounds/left.mp3`).play(undefined);
-      this.stopCall('Call is over');
-    });
   }
 
   requestCall(contact: Contact) {
@@ -213,8 +213,8 @@ export class SmartphoneComponent implements OnInit {
     console.log(`Stopping call because of: ${reason}`);
     await this.player!.state.saveVariable(PlayerStateVariables.CALLING, null);
     this.ringingSound.stop();
-    this.api?.dispose();
-    this.api = null;
+    this.room?.disconnect();
+    this.room = undefined;
 
     WA.event.broadcast(BroadcastEvents.CALL_DECLINED, this.callRequest);
     this.callRequest = undefined;
