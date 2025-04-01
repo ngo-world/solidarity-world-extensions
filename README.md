@@ -6,8 +6,11 @@ npm start
 
 :pencil: See also the `server/` directory.
 
-- https://primeng.org/icons#list
-- https://tailwindcss.com/docs/flex
-- https://workadventure.solidarity-world.de/~/maps/prototype_fund.wam
-- https://app.asana.com/0/1207736750484991/1207736754574098
-- https://stackoverflow.com/a/58470005
+## Supported by
+
+<a href="https://prototypefund.de/">
+  <img src="public/ptf.png" height="150"/>
+</a>
+<a href="https://www.bmbf.de/">
+  <img src="public/bmbf_de.jpg" height="150"/>
+</a>
